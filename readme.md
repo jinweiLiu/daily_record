@@ -11,7 +11,8 @@
 - Linux配置java环境变量
 
   ```bash
-  #可能编辑不同文件 /etc/profile
+  #可能编辑不同文件 /etc/profile ~/.bashrc
+  #参考连接 https://blog.csdn.net/uisoul/article/details/89439575
   export JAVA_HOME=/root/jdk/jdk1.8.0_291
   export JRE_HOME=${JAVA_HOME}/jre
   export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
