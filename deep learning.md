@@ -13,4 +13,10 @@
   http://127.0.0.1:16006
   ```
 
-  
+
+#### 代码相关
+
+```python
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+```
+
