@@ -54,7 +54,9 @@
 
   ```bash
   git branch  #一般用于分支的操作，比如创建分支，查看分支等等，
+    git  branch -a #列出本地分支和远程分支
   git checkout  #一般用于文件的操作和分支的操作
+  git push origin branchName #将本地分支推送到远程仓库上
   ```
 
 #### web相关
