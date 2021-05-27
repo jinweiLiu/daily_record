@@ -17,6 +17,7 @@
 #### 代码相关
 
 ```python
+#选择指定显卡运行程序
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 ```
 
