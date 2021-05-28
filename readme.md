@@ -48,6 +48,24 @@
   docker start/stop 容器id #开启和关闭容器
   ```
 
+- docker启动tomcat
+
+  ```bash
+  docker run -d -p 8888:8080 -v /root/tomcat/:/usr/local/tomcat/webapps/ tomcat
+  ```
+
+  > -d 后台运行
+  >
+  > -p 指定访问主机的`8888`端口映射到`8080`端口。
+  >
+  > -v 指定我们容器的`/usr/local/tomcat/webapps/`目录为`/root/tomcat/`主机目录，后续我们要对tomcat进行操作直接在主机这个目录操作即可。
+
+#### nginx相关
+
+配置两个服务器
+
+![image-20210528214640225](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210528214640225.png)
+
 #### git相关
 
 - git使用
