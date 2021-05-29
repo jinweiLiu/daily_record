@@ -60,6 +60,24 @@
   >
   > -v 指定我们容器的`/usr/local/tomcat/webapps/`目录为`/root/tomcat/`主机目录，后续我们要对tomcat进行操作直接在主机这个目录操作即可。
 
+- docker启动zookeeper
+
+  ```bash
+  #下载Zookeeper镜像
+  docker pull zookeeper
+  #启动容器并添加映射
+  docker run --privileged=true -d --name zookeeper --publish 2181:2181 -d zookeeper:latest
+  #查看容器是否启动
+  docker ps
+  
+  #客户端连接zookeeper，类似redis
+  ./zkCli.sh
+  #查看注册的服务
+  ls /services
+  #退出客户端
+  quit
+  ```
+
 #### nginx相关
 
 配置两个服务器
