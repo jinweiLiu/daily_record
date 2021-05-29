@@ -106,6 +106,43 @@
   > - 使用的资源不同，同其他代码快一样，拦截器也是一个Spring的组件，归Spring管理，配置在Spring文件中，因此能使用Spring里的任何资源、对象，例如Service对象、数据源、事务管理等，通过ioc注入到拦截器即可；而Filter则不能。
   > -  深度不同，Filter只在Servlet前后起作用。而拦截器能够深入到方法前后、异常抛出前后，因此拦截器的使用具有更大的弹性。所以在Spring构架的程序中，优先使用拦截器。
 
+- 跨域请求(CORS)
+
+  > CORS全称Cross Origin Resource Sharing
+  >
+  > 简单的来说就是一个项目去访问另外一个不同地址的项目的资源就叫跨域请求
+  >
+  > 之所以会跨域，是因为受到了同源策略的限制，同源策略要求源相同才能正常进行通信，即**协议、域名、端口号**都完全一致
+
+  - 解决方案
+
+    - 局部配置
+
+      Controller上加一个@CrossOrgin
+
+    - 全局配置
+
+      添加一个配置类
+
+      ```java
+      @Bean
+      public WebMvcConfigurer webMvcConfigurer(){
+          return new WebMvcConfigurer() {
+              @Override
+              public void addCorsMappings(CorsRegistry registry) {
+                  registry.addMapping("/**")//允许访问的资源路径
+                      .allowedOrigins("http://lgp6.cn")//允许跨域访问的域名
+                      .allowedMethods("*")//允许方法（POST GET等 *为全部）
+                      . allowedHeaders("*") //允许的请求头 *为任何请求头
+                      .allowCredentials(true) //是否携带cookire信息
+                      .exposedHeaders(HttpHeaders.SET_COOKIE).maxAge(3600L); //maxAge(3600)表明在3600秒内，不需要再发送预检验请求，可以缓存该结果
+      
+              }
+      
+          };
+      }
+      ```
+
 #### 语言相关
 
 - 值传递和引用传递
@@ -114,3 +151,4 @@
   >
   > - 如果是基本类型（byte, short, int, long, float, double, boolean, char），就是将原有的数据拷贝一份，方法内的操作对原有的数据不会有影响。
   > - 如果是对象类型，这里是容易误解的地方，因为正好规定对象的地址也叫做"**reference**", 我们将对象作为参数传递的时候实际上是将对象的地址传递进去。
+
