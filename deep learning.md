@@ -147,3 +147,30 @@ random=1                     ★ 为1打开随机多尺度训练，为0则关闭
                              随机尺度训练的范围，这样可以增大batch，望读者自行尝试！
 ```
 
+#### 目标检测评价指标
+
+- IOU交并比
+
+- TP (真阳性，被正确分类的正例) 
+
+- FN(假阴性，本来是正例，错分为负例) 
+
+- TN(真阴性，被正确分类的负例) 
+
+- FP(假阳性，本来是负例，被错分为正例)
+
+- 精确率P
+
+  - P = TP/(TP+FP) 
+  - R = TP/(TP+FN)
+
+- AP 顾名思义AP就是平均精准度，简单来说就是对PR曲线上的Precision值求均值。对于pr曲线来说，我们使用积分来进行计算。
+
+  ![[公式]](https://www.zhihu.com/equation?tex=AP%3D%5Cint_%7B0%7D%5E%7B1%7Dp%28r%29dr)
+
+  - AP<sub>50</sub>：IoU阈值为0.5时的AP测量值
+  - AP<sub>70</sub>：IoU阈值为0.75时的测量值
+  - AP@50:5:95指的是IOU的值从50%取到95%，步长为5%，然后算在在这些IOU下的AP的均值
+  - AP<sub>S</sub> : 像素面积小于 ![[公式]](https://www.zhihu.com/equation?tex=32%5E2) 的目标框的AP测量值
+  - AP<sub>M</sub> : 像素面积在![[公式]](https://www.zhihu.com/equation?tex=32%5E2)- ![[公式]](https://www.zhihu.com/equation?tex=96%5E2)之间目标框的测量值
+  - AP<sub>L</sub> : 像素面积大于 ![[公式]](https://www.zhihu.com/equation?tex=96%5E2) 的目标框的AP测量值
