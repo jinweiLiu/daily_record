@@ -73,3 +73,56 @@ class Solution {
 }
 ```
 
+#### 525、连续数组
+
+给定一个二进制数组 nums , 找到含有相同数量的 0 和 1 的最长连续子数组，并返回该子数组的长度。
+
+示例 1:
+
+```
+输入: nums = [0,1]
+输出: 2
+说明: [0, 1] 是具有相同数量0和1的最长连续子数组。
+```
+
+示例 2:
+
+```
+输入: nums = [0,1,0]
+输出: 2
+说明: [0, 1] (或 [1, 0]) 是具有相同数量0和1的最长连续子数组。
+```
+
+**解题思路**：
+
+前缀和 + 哈希表，利用counter变量记录1和0的数目，如果为1，则加1，如果为0，则减1。遍历过程寻找map中与当前counter值相同的key，相减求取最长连续数组。
+
+**题解代码**：
+
+```java
+class Solution {
+    public int findMaxLength(int[] nums) {
+        int n = nums.length;
+        Map<Integer,Integer> map = new HashMap<>();
+        int maxLen = 0;
+        int counter = 0;
+        map.put(counter,-1);
+        for(int i = 0; i < n; ++i){
+            int num = nums[i];
+            if(num == 1){
+                counter ++;
+            }else{
+                counter --;
+            }
+            if(map.containsKey(counter)){
+                int pre = map.get(counter);
+                maxLen = Math.max(maxLen,i - pre);
+            }else{
+                map.put(counter,i);
+            }
+        }
+        return maxLen;
+    }
+}
+```
+
