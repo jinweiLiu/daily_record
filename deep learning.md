@@ -26,6 +26,12 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 conda create -n xxx python=3.6
 #anaconda删除环境
 conda remove -n your_env_name(虚拟环境名称) --all
+#删除没有用的包
+conda clean -p   
+#tar打包
+conda clean -t      
+#删除所有的安装包及cache
+conda clean -y -all 
 ```
 
 ### yolov3
