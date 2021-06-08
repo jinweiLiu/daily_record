@@ -32,6 +32,12 @@ conda clean -p
 conda clean -t      
 #删除所有的安装包及cache
 conda clean -y -all 
+
+#####
+## pytorch安装
+#####
+#测试是否安装成功
+torch.cuda.is_available() 
 ```
 
 ### yolov3

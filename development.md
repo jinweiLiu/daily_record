@@ -152,6 +152,10 @@
   > - 如果是基本类型（byte, short, int, long, float, double, boolean, char），就是将原有的数据拷贝一份，方法内的操作对原有的数据不会有影响。
   > - 如果是对象类型，这里是容易误解的地方，因为正好规定对象的地址也叫做"**reference**", 我们将对象作为参数传递的时候实际上是将对象的地址传递进去。
 
+- Python注册器（Register）
+
+
+
 #### Spring boot相关
 
 - 整合shiro 安全框架
