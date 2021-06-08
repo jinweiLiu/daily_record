@@ -349,3 +349,160 @@ def storeTree(inputTree, filename):
         pickle.dump(inputTree, fw)
 ```
 
+### 朴素贝叶斯
+
+#### 贝叶斯推断
+
+条件概率
+
+![image-20210608145111344](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210608145111344.png)
+
+- p(c)称为先验概率 (prior probability), 即在x发生之前，我们对c事件概率的一个判断。
+- p(c|x)称为后验概率 (posterior probability), 即在x发生之后，我们对c事件概率的重新评估。
+- p(x|c)/p(x)称为可能性函数 (likelihood), 这是一个调整因子，使得预估概率更接近真实概率。
+
+所以，条件概率可以理解为下面的式子：
+
+> 后验概率 = 先验概率 * 调整因子
+
+#### 朴素贝叶斯
+
+朴素贝叶斯对条件概率分布做了条件独立性假设，比如下面的公式，假设有n个特征：
+
+p(a|X) = p(X|a)p(a) = p(x<sub>1</sub>,x<sub>2</sub>,x<sub>3</sub>,...,x<sub>n</sub>|a)p(a)
+
+由于每个特征都是独立的，我们可以进一步拆分公式：
+
+p(a|X) = p(X|a)p(a) = {p(x<sub>1</sub>|a)\*p(x<sub>2</sub>|a)\*p(x<sub>3</sub>|a)\*...\*p(x<sub>n</sub>|a)}p(a)
+
+#### **实例**
+
+某个医院早上来了六个门诊的病人，他们的情况如下表所示：
+
+| 症状   | 职业     | 疾病   |
+| ------ | -------- | ------ |
+| 打喷嚏 | 护士     | 感冒   |
+| 打喷嚏 | 农夫     | 过敏   |
+| 头痛   | 建筑工人 | 脑震荡 |
+| 头痛   | 建筑工人 | 感冒   |
+| 打喷嚏 | 教师     | 感冒   |
+| 头痛   | 教师     | 脑震荡 |
+
+现在又来了第七个病人，是一个打喷嚏的建筑工人。请问他患上感冒的概率有多大？
+
+根据贝叶斯定理：
+$$
+P(A|B) = \frac{P(B|A)P(A)}{P(B)}
+$$
+可得
+$$
+P(感冒|打喷嚏*建筑工人) = \frac{P(打喷嚏*建筑工人|感冒)P(感冒)}{P(打喷嚏*建筑工人)}
+$$
+根据朴素贝叶斯条件独立性的假设可知，打喷嚏和建筑工人这两个特征式独立的，因此，上面的等式就变成了
+$$
+P(感冒|打喷嚏*建筑工人) = \frac{P(打喷嚏|感冒)P(建筑工人|感冒)P(感冒)}{P(打喷嚏)P(建筑工人)}
+$$
+这里可以计算：
+$$
+P(感冒|打喷嚏*建筑工人) = \frac{0.66*0.33*0.5}{0.5*0.33} = 0.66
+$$
+
+#### 言论过滤器
+
+```python
+#建立实验样本
+def loadDataSet():
+    postingList=[['my', 'dog', 'has', 'flea', 'problems', 'help', 'please'],                #切分的词条
+                 ['maybe', 'not', 'take', 'him', 'to', 'dog', 'park', 'stupid'],
+                 ['my', 'dalmation', 'is', 'so', 'cute', 'I', 'love', 'him'],
+                 ['stop', 'posting', 'stupid', 'worthless', 'garbage'],
+                 ['mr', 'licks', 'ate', 'my', 'steak', 'how', 'to', 'stop', 'him'],
+                 ['quit', 'buying', 'worthless', 'dog', 'food', 'stupid']]
+    classVec = [0,1,0,1,0,1]                                                               #类别标签向量，1代表侮辱性词汇，0代表不是
+    return postingList,classVec
+
+#转化为词向量
+def setOfWords2Vec(vocabList, inputSet):
+    returnVec = [0] * len(vocabList)                                    #创建一个其中所含元素都为0的向量
+    for word in inputSet:                                                #遍历每个词条
+        if word in vocabList:                                            #如果词条存在于词汇表中，则置1
+            returnVec[vocabList.index(word)] = 1
+        else: print("the word: %s is not in my Vocabulary!" % word)
+    return returnVec                                                    #返回文档向量
+
+#建立词汇表
+def createVocabList(dataSet):
+    vocabSet = set([])                      #创建一个空的不重复列表
+    for document in dataSet:               
+        vocabSet = vocabSet | set(document) #取并集
+    return list(vocabSet)
+
+#朴素贝叶斯分类器训练函数
+def trainNB0(trainMatrix,trainCategory):
+    numTrainDocs = len(trainMatrix)                            #计算训练的文档数目
+    numWords = len(trainMatrix[0])                            #计算每篇文档的词条数
+    pAbusive = sum(trainCategory)/float(numTrainDocs)        #文档属于侮辱类的概率
+    p0Num = np.zeros(numWords); p1Num = np.zeros(numWords)    #创建numpy.zeros数组,词条出现数初始化为0
+    p0Denom = 0.0; p1Denom = 0.0                            #分母初始化为0
+    for i in range(numTrainDocs):
+        if trainCategory[i] == 1:                            #统计属于侮辱类的条件概率所需的数据，即P(w0|1),P(w1|1),P(w2|1)···
+            p1Num += trainMatrix[i]
+            p1Denom += sum(trainMatrix[i])
+        else:                                                #统计属于非侮辱类的条件概率所需的数据，即P(w0|0),P(w1|0),P(w2|0)···
+            p0Num += trainMatrix[i]
+            p0Denom += sum(trainMatrix[i])
+    p1Vect = p1Num/p1Denom                                      
+    p0Vect = p0Num/p0Denom         
+    return p0Vect,p1Vect,pAbusive                            #返回属于侮辱类的条件概率数组，属于非侮辱类的条件概率数组，文档属于侮辱类的概率
+
+#朴素贝叶斯分类器分类函数
+def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
+	p1 = reduce(lambda x,y:x*y, vec2Classify * p1Vec) * pClass1    			#对应元素相乘
+	p0 = reduce(lambda x,y:x*y, vec2Classify * p0Vec) * (1.0 - pClass1)
+	print('p0:',p0)
+	print('p1:',p1)
+	if p1 > p0:
+		return 1
+	else: 
+		return 0
+```
+
+#### 朴素贝叶斯改进
+
+- 拉普拉斯平滑
+
+利用贝叶斯分类器对文档进行分类时，要计算多个概率的乘积以获得文档属于某个类别的概率，即计算p(w0|1)p(w1|1)p(w2|1)。如果其中有一个概率值为0，那么最后的成绩也为0。
+
+显然，这样是不合理的，为了降低这种影响，可以将所有词的出现数初始化为1，并将分母初始化为2。这种做法就叫做拉普拉斯平滑(Laplace Smoothing)又被称为加1平滑，是比较常用的平滑方法，它就是为了解决0概率问题。
+
+除此之外，另外一个遇到的问题就是下溢出，这是由于太多很小的数相乘造成的。学过数学的人都知道，两个小数相乘，越乘越小，这样就造成了下溢出。在程序中，在相应小数位置进行四舍五入，计算结果可能就变成0了。为了解决这个问题，对乘积结果取自然对数。通过求对数可以避免下溢出或者浮点数舍入导致的错误。同时，采用自然对数进行处理不会有任何损失。下图给出函数f(x)和ln(f(x))的曲线。
+
+**改进的函数**
+
+```python
+def trainNB0(trainMatrix,trainCategory):
+    numTrainDocs = len(trainMatrix)                            #计算训练的文档数目
+    numWords = len(trainMatrix[0])                            #计算每篇文档的词条数
+    pAbusive = sum(trainCategory)/float(numTrainDocs)        #文档属于侮辱类的概率
+    p0Num = np.ones(numWords); p1Num = np.ones(numWords)    #创建numpy.ones数组,词条出现数初始化为1，拉普拉斯平滑
+    p0Denom = 2.0; p1Denom = 2.0                            #分母初始化为2,拉普拉斯平滑
+    for i in range(numTrainDocs):
+        if trainCategory[i] == 1:                            #统计属于侮辱类的条件概率所需的数据，即P(w0|1),P(w1|1),P(w2|1)···
+            p1Num += trainMatrix[i]
+            p1Denom += sum(trainMatrix[i])
+        else:                                                #统计属于非侮辱类的条件概率所需的数据，即P(w0|0),P(w1|0),P(w2|0)···
+            p0Num += trainMatrix[i]
+            p0Denom += sum(trainMatrix[i])
+    p1Vect = np.log(p1Num/p1Denom)                            #取对数，防止下溢出         
+    p0Vect = np.log(p0Num/p0Denom)         
+    return p0Vect,p1Vect,pAbusive                            #返回属于侮辱类的条件概率数组，属于非侮辱类的条件概率数组，文档属于侮辱类的概率
+
+def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
+    p1 = sum(vec2Classify * p1Vec) + np.log(pClass1)        #对应元素相乘。logA * B = logA + logB，所以这里加上log(pClass1)
+    p0 = sum(vec2Classify * p0Vec) + np.log(1.0 - pClass1)
+    if p1 > p0:
+        return 1
+    else:
+        return 0
+```
+
