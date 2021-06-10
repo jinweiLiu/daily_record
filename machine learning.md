@@ -487,10 +487,10 @@ def trainNB0(trainMatrix,trainCategory):
     p0Num = np.ones(numWords); p1Num = np.ones(numWords)    #创建numpy.ones数组,词条出现数初始化为1，拉普拉斯平滑
     p0Denom = 2.0; p1Denom = 2.0                            #分母初始化为2,拉普拉斯平滑
     for i in range(numTrainDocs):
-        if trainCategory[i] == 1:                            #统计属于侮辱类的条件概率所需的数据，即P(w0|1),P(w1|1),P(w2|1)···
+        if trainCategory[i] == 1:          #统计属于侮辱类的条件概率所需的数据，即P(w0|1),P(w1|1),P(w2|1)···
             p1Num += trainMatrix[i]
             p1Denom += sum(trainMatrix[i])
-        else:                                                #统计属于非侮辱类的条件概率所需的数据，即P(w0|0),P(w1|0),P(w2|0)···
+        else:                              #统计属于非侮辱类的条件概率所需的数据，即P(w0|0),P(w1|0),P(w2|0)···
             p0Num += trainMatrix[i]
             p0Denom += sum(trainMatrix[i])
     p1Vect = np.log(p1Num/p1Denom)                            #取对数，防止下溢出         
@@ -506,3 +506,151 @@ def classifyNB(vec2Classify, p0Vec, p1Vec, pClass1):
         return 0
 ```
 
+### Logistic回归
+
+#### 概述
+
+假设现在有一些数据点，我们利用一条直线对这些带你进行拟合（该线称为最佳拟合直线），这个拟合过程就称作回归。Logistic回归是一种二分类算法，他利用的是sigmoid函数阈值在[0,1]这个特性。
+
+sigmoid函数：
+$$
+\sigma(x) = \frac{1}{1+e^{-z}}
+\\
+\sigma^{'}(x) = \sigma(x)(1-\sigma(x))
+$$
+图像
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210609142110571.png" alt="image-20210609142110571" style="zoom:80%;" />
+
+根据sigmoid函数的特性，我们可以做出以下的假设
+$$
+P(y = 1 |x,\theta) = h_\theta(x) 
+$$
+
+$$
+P(y = 0 |x,\theta) = 1 - h_\theta(x)
+$$
+
+上式即为在已知样本x和参数θ的情况下，样本x属性正样本(y=1)和负样本(y=0)的条件概率。理想状态下，根据上述公式，求出各个点的概率均为1，也就是完全分类都正确。但是考虑到实际情况，样本点的概率越接近于1，其分类效果越好。比如一个样本属于正样本的概率为0.51，那么我们就可以说明这个样本属于正样本。另一个样本属于正样本的概率为0.99，那么我们也可以说明这个样本属于正样本。但是显然，第二个样本概率更高，更具说服力。我们可以把上述两个概率公式合二为一：
+$$
+Cost(h_\theta(x),y) = h_\theta(x)^y(1-h_\theta(x))^{(1-y)}
+$$
+合并出来的Cost，我们称之为代价函数(Cost Function)。当y等于1时，(1-y)项(第二项)为0；当y等于0时，y项(第一项)为0。为了简化问题，我们对整个表达式求对数，(将指数问题对数化是处理数学问题常见的方法)：
+$$
+Cost(h_\theta(x),y) = y\log h_\theta(x)+(1-y)\log(1-h_\theta(x))
+$$
+这个代价函数，是对于一个样本而言的。给定一个样本，我们就可以通过这个代价函数求出，样本所属类别的概率，而这个概率越大越好，所以也就是求解这个代价函数的最大值。既然概率出来了，那么最大似然估计也该出场了。假定样本与样本之间相互独立，那么整个样本集生成的概率即为所有样本生成概率的乘积，再将公式对数化，便可得到如下公式：
+$$
+J(\theta) = \sum_{i=1}^{m}[y^{i}\log h_\theta(x^{i})+(1-y^{i})\log(1-h_\theta(x^{i}))]
+$$
+其中，m为样本的总数，y(i)表示第i个样本的类别，x(i)表示第i个样本，需要注意的是θ是多维向量，x(i)也是多维向量。
+
+**综上所述，满足J(θ)的最大的θ值即是我们需要求解的模型。**
+
+求解函数的极大值使用梯度上升算法，函数添加负号，即变为梯度下降算法来求极小值。
+
+通用求解公式：
+$$
+\theta _j := \theta _j + \alpha\frac{\partial J(\theta)}{\theta _j}
+$$
+
+#### 梯度上升
+
+```python
+# -*- coding:UTF-8 -*-
+import numpy as np
+
+"""
+函数说明:加载数据
+
+Parameters:
+    无
+Returns:
+    dataMat - 数据列表
+    labelMat - 标签列表
+"""
+def loadDataSet():
+    dataMat = []                                                        #创建数据列表
+    labelMat = []                                                        #创建标签列表
+    fr = open('testSet.txt')                                            #打开文件   
+    for line in fr.readlines():                                            #逐行读取
+        lineArr = line.strip().split()                                    #去回车，放入列表
+        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])        #添加数据
+        labelMat.append(int(lineArr[2]))                                #添加标签
+    fr.close()                                                            #关闭文件
+    return dataMat, labelMat                                            #返回
+
+"""
+函数说明:sigmoid函数
+
+Parameters:
+    inX - 数据
+Returns:
+    sigmoid函数
+"""
+def sigmoid(inX):
+    return 1.0 / (1 + np.exp(-inX))
+
+
+"""
+函数说明:梯度上升算法
+
+Parameters:
+    dataMatIn - 数据集
+    classLabels - 数据标签
+Returns:
+    weights.getA() - 求得的权重数组(最优参数)
+"""
+def gradAscent(dataMatIn, classLabels):
+    dataMatrix = np.mat(dataMatIn)                                        #转换成numpy的mat
+    labelMat = np.mat(classLabels).transpose()                            #转换成numpy的mat,并进行转置
+    m, n = np.shape(dataMatrix)                                      #返回dataMatrix的大小。m为行数,n为列数。
+    alpha = 0.001                                                    #移动步长,也就是学习速率,控制更新的幅度。
+    maxCycles = 500                                                  #最大迭代次数
+    weights = np.ones((n,1))
+    for k in range(maxCycles):
+        h = sigmoid(dataMatrix * weights)                                #梯度上升矢量化公式
+        error = labelMat - h
+        weights = weights + alpha * dataMatrix.transpose() * error
+    return weights.getA()                                                #将矩阵转换为数组，返回权重数组
+```
+
+#### 改进的随机梯度上升算法
+
+梯度上升算法在每次更新回归系数(最优参数)时，都需要遍历整个数据集。该方法处理100个左右的数据集时尚可，但如果有数十亿样本和成千上万的特征，那么该方法的计算复杂度就太高了。因此，需要对算法进行改进，我们每次更新回归系数(最优参数)的时候，能不能不用所有样本呢？一次只用一个样本点去更新回归系数(最优参数)？这样就可以有效减少计算量了，这种方法就叫做随机梯度上升算法。
+
+```python
+def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    m,n = np.shape(dataMatrix)                                       #返回dataMatrix的大小。m为行数,n为列数。
+    weights = np.ones(n)                                             #参数初始化
+    for j in range(numIter):                                           
+        dataIndex = list(range(m))
+        for i in range(m):           
+            alpha = 4/(1.0+j+i)+0.01                                     #降低alpha的大小，每次减小1/(j+i)。
+            randIndex = int(random.uniform(0,len(dataIndex)))                #随机选取样本
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))                    #选择随机选取的一个样本，计算h
+            error = classLabels[randIndex] - h                                 #计算误差
+            weights = weights + alpha * error * dataMatrix[randIndex]       #更新回归系数
+            del(dataIndex[randIndex])                                         #删除已经使用的样本
+    return weights                                                      #返回
+```
+
+#### 使用 Sklearn 构建 Logistic 回归分类器
+
+![image-20210609151454818](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210609151454818.png)
+
+优化算法
+
+- solver：优化算法选择参数，只有五个可选参数，即newton-cg,lbfgs,liblinear,sag,saga。默认为liblinear。solver参数决定了我们对逻辑回归损失函数的优化方法，有四种算法可以选择，分别是：
+  - liblinear：使用了开源的liblinear库实现，内部使用了坐标轴下降法来迭代优化损失函数。
+  - lbfgs：拟牛顿法的一种，利用损失函数二阶导数矩阵即海森矩阵来迭代优化损失函数。
+  - newton-cg：也是牛顿法家族的一种，利用损失函数二阶导数矩阵即海森矩阵来迭代优化损失函数。
+  - sag：即随机平均梯度下降，是梯度下降法的变种，和普通梯度下降法的区别是每次迭代仅仅用一部分的样本来计算梯度，适合于样本数据多的时候。
+  - saga：线性收敛的随机优化算法的的变重。
+  - 总结：
+    - liblinear适用于小数据集，而sag和saga适用于大数据集因为速度更快。
+    - 对于多分类问题，只有newton-cg,sag,saga和lbfgs能够处理多项损失，而liblinear受限于一对剩余(OvR)。啥意思，就是用liblinear的时候，如果是多分类问题，得先把一种类别作为一个类别，剩余的所有类别作为另外一个类别。一次类推，遍历所有类别，进行分类。
+    - newton-cg,sag和lbfgs这三种优化算法时都需要损失函数的一阶或者二阶连续导数，因此不能用于没有连续导数的L1正则化，只能用于L2正则化。而liblinear和saga通吃L1正则化和L2正则化。
+    - 同时，sag每次仅仅使用了部分样本进行梯度迭代，所以当样本量少的时候不要选择它，而如果样本量非常大，比如大于10万，sag是第一选择。但是sag不能用于L1正则化，所以当你有大量的样本，又需要L1正则化的话就要自己做取舍了。要么通过对样本采样来降低样本量，要么回到L2正则化。
+    - 从上面的描述，大家可能觉得，既然newton-cg, lbfgs和sag这么多限制，如果不是大样本，我们选择liblinear不就行了嘛！错，因为liblinear也有自己的弱点！我们知道，逻辑回归有二元逻辑回归和多元逻辑回归。对于多元逻辑回归常见的有one-vs-rest(OvR)和many-vs-many(MvM)两种。而MvM一般比OvR分类相对准确一些。郁闷的是liblinear只支持OvR，不支持MvM，这样如果我们需要相对精确的多元逻辑回归时，就不能选择liblinear了。也意味着如果我们需要相对精确的多元逻辑回归不能使用L1正则化了。
+      

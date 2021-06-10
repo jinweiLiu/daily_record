@@ -185,11 +185,9 @@ $$
 
 因此状态转移方程如下：
 $$
-\textit{dp}[i+1][j]= \begin{cases} \textit{dp}[i][j],& j<\textit{stones}[i] \\ \textit{dp}[i][j] \lor \textit{dp}[i][j-\textit{stones}[i]], & j\ge \textit{stones}[i] \end{cases}
+\textit{dp}[i+1][j]= \begin{cases} \textit{dp}[i][j],& j<\textit{stones}[i] \\ \textit{dp}[i][j] \lor \textit{dp}[i][j-\textit{stones}[i]], & j\ge \textit{stones}[i] \end{cases}
 $$
 其中 $\lor $表示逻辑或运算。求出$ \textit{dp}[n][] $后，所有为真的 $\textit{dp}[n][j]$ 中，最大的 $j$ 即为 $\textit{neg}$ 能取到的最大值。代入 $\textit{sum}-2\cdot\textit{neg}$ 中即得到最后一块石头的最小重量。
-
-
 
 **题解代码**：
 
@@ -217,6 +215,56 @@ class Solution {
                 return sum - 2 * j;
             }
         }
+    }
+}
+```
+
+#### 518、零钱兑换II
+
+给定不同面额的硬币和一个总金额。写出函数来计算可以凑成总金额的硬币组合数。假设每一种面额的硬币有无限个。 
+
+示例 1:
+
+```
+输入: amount = 5, coins = [1, 2, 5]
+输出: 4
+解释: 有四种方式可以凑成总金额:
+5=5
+5=2+2+1
+5=2+1+1+1
+5=1+1+1+1+1
+```
+
+示例 2:
+
+```
+输入: amount = 3, coins = [2]
+输出: 0
+解释: 只用面额2的硬币不能凑成总金额3。
+```
+
+**解题思路**：
+
+通过动态规划的方法计算可能的组合数。用 $\textit{dp}[x]$ 表示金额之和等于 xx 的硬币组合数，目标是求$ \textit{dp}[\textit{amount}]$。
+
+- 初始化$ \textit{dp}[0]=1$；
+- 遍历 $coins$，对于其中的每个元素 $coin$，进行如下操作：
+  - 遍历 $i$ 从 $coin$ 到 $amount$，将 $dp[i−coin] $的值加到 $dp[i]$。
+- 最终得到 $\textit{dp}[\textit{amount}]$ 的值即为答案。
+
+**题解代码**：
+
+```python
+class Solution {
+    public int change(int amount, int[] coins) {
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+        for (int coin : coins) {
+            for (int i = coin; i <= amount; i++) {
+                dp[i] += dp[i - coin];
+            }
+        }
+        return dp[amount];
     }
 }
 ```
