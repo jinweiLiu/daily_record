@@ -154,7 +154,73 @@
 
 - Python注册器（Register）
 
+  注册器机制的引入是为了使工程的扩展性变得更好。当产品增加某个功能需要添加一些新函数或者类时，它可以保证我们可以复用之前的逻辑。
 
+  使用方法：
+
+  ```python
+  register_obj = RegisterMachine("register")
+  # decorate method
+  @register_obj.register()
+  def say_hello_with(name):
+      print("Hello, {person}!".format(person=name))
+      
+  def say_hi_with(name):
+      print("Hi, {person}!".format(person=name))
+      
+  register_obj.get("say_hello_with")("Peter")
+  # function call method
+  register_obj.register(say_hi_with)
+  register_obj.get("say_hi_with")("John")
+  ```
+
+  从上面的例子我们可以看出，通过register_obj这个对象，通过传入对应的函数名来得到该函数，具体的实现如下：
+
+  ```python
+  class RegisterMachine(object):
+      def __init__(self, name):
+          # name of register
+          self._name = name
+          self._name_method_map = dict()
+      
+      def register(self, obj=None):
+          # obj == None for function call register
+          # otherwise for decorator way
+          if obj != None:
+              name = obj.__name__
+              self._name_method_map[name] = obj
+          
+          else:
+              def wrapper(func):
+                  name = func.__name__
+                  self._name_method_map[name] = func
+                  return func
+              return wrapper
+  
+      def get(self, name):
+          return self._name_method_map[name]
+  
+  if __name__ == "__main__":
+      register_obj = RegisterMachine("register")
+      # decorate method
+      @register_obj.register()
+      def say_hello_with(name):
+          print("Hello, {person}!".format(person=name))
+  
+      def say_hi_with(name):
+          print("Hi, {person}!".format(person=name))
+  
+      register_obj.get("say_hello_with")("Peter")
+      # function call method
+      register_obj.register(say_hi_with)
+      register_obj.get("say_hi_with")("John")
+  ```
+
+  运行结果
+
+  > Hello, Peter! 
+  >
+  > Hi, John!
 
 #### Spring boot相关
 
