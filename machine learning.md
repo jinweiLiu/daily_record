@@ -653,4 +653,142 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     - newton-cg,sag和lbfgs这三种优化算法时都需要损失函数的一阶或者二阶连续导数，因此不能用于没有连续导数的L1正则化，只能用于L2正则化。而liblinear和saga通吃L1正则化和L2正则化。
     - 同时，sag每次仅仅使用了部分样本进行梯度迭代，所以当样本量少的时候不要选择它，而如果样本量非常大，比如大于10万，sag是第一选择。但是sag不能用于L1正则化，所以当你有大量的样本，又需要L1正则化的话就要自己做取舍了。要么通过对样本采样来降低样本量，要么回到L2正则化。
     - 从上面的描述，大家可能觉得，既然newton-cg, lbfgs和sag这么多限制，如果不是大样本，我们选择liblinear不就行了嘛！错，因为liblinear也有自己的弱点！我们知道，逻辑回归有二元逻辑回归和多元逻辑回归。对于多元逻辑回归常见的有one-vs-rest(OvR)和many-vs-many(MvM)两种。而MvM一般比OvR分类相对准确一些。郁闷的是liblinear只支持OvR，不支持MvM，这样如果我们需要相对精确的多元逻辑回归时，就不能选择liblinear了。也意味着如果我们需要相对精确的多元逻辑回归不能使用L1正则化了。
-      
+
+### 支持向量机（SVM）
+
+分类算法，寻找一个最优化的“决策面”。一个最优化问题通常由两个基本的因素：（1）目标函数，也就是你希望什么东西的什么指标达到最好；（2）优化对象，你期望通过改变哪些因素来使你的目标函数达到最优。在线性SVM算法中，目标函数显然就是那个"分类间隔"，而优化对象则是决策面。所以要对SVM问题进行数学建模，首先要对上述两个对象（“分类间隔"和"决策面”）进行数学描述。按照一般的思维习惯，我们先描述决策面。
+
+#### 数学建模
+
+数学建模的时候，先在二维空间建模，然后再推广到多维。
+
+![image-20210614205845159](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210614205845159.png)
+
+- 决策面方程
+
+二维空间下的方程表示为： $y = ax +b$
+
+向量化表示为：$w^T + \gamma = 0$，其中$w = [w_1,w_2]^T,x = [x_1,x_2]^T$
+
+将其退广到高维空间上时公式没变，不同之处在于$w = [w_1,w_2,...,w_n]^T,x = [x_1,x_2,...,x_n]^T$
+
+- 分类间隔方程
+
+点到线的公式为：
+$$
+d = |\frac{Ax_0+By_0+C}{\sqrt{A^2 + B^2}}|
+$$
+现在，将直线方程扩展到多维，求得我们现在的超平面方程，对公式进行如下变形：
+$$
+d = \frac{|w^Tx+\gamma|}{||w||}
+$$
+
+- 约束条件
+
+看起来，我们已经顺利获得了目标函数的数学形式。但是为了求解w的最大值。我们不得不面对如下问题：
+
+> -- 我们如何判断超平面是否将样本点正确分类
+>
+> -- 我们知道相求距离d的最大值，我们首先需要找到支持向量上的点，怎么再众多的点中选出支持向量上的点呢
+
+如果我们的超平面方程能够完全正确地对上图的样本点进行分类，就会满足下面的方程：
+$$
+\begin{cases} \frac{w^Tx_i+\gamma}{||w||}>=d, \forall y_i=1 \\ \frac{w^Tx_i+\gamma}{||w||}<=-d, \forall y_i=-1 \end{cases}
+$$
+上述公式的解释就是，对于所有分类标签为1的样本点，它们到直线的距离都大于等于d(支持向量上的样本点到超平面的距离)。对于所有分类标签为-1的样本点，它们到直线的距离都小于等于d。
+
+公式最终可以变成如下形式：
+$$
+y_i(w^Tx_i+\gamma)\geq1, \forall x_i
+$$
+
+- 线性SVM优化问题基本描述
+
+$$
+min\frac{1}{2}||w||^2   \quad\quad s.t.\quad y_i(w^Tx_i+b)\geq 1,i=1,2...,n
+$$
+
+这里n时样本点的总个数，上述公式描述的是一个典型的不等式约束条件下的二次型函数优化问题，同时也是支持向量机的基本数学模型。
+
+- 求解方法
+
+拉格朗日函数
+
+#### SMO算法
+
+SMO算法的工作原理是：每次循环中选择两个alpha进行优化处理。一旦找到了一对合适的alpha，那么就增大其中一个同时减小另一个。这里所谓的"合适"就是指两个alpha必须符合以下两个条件，条件之一就是两个alpha必须要在间隔边界之外，而且第二个条件则是这两个alpha还没有进进行过区间化处理或者不在边界上。
+
+```python
+"""
+函数说明:简化版SMO算法
+
+Parameters:
+    dataMatIn - 数据矩阵
+    classLabels - 数据标签
+    C - 松弛变量
+    toler - 容错率
+    maxIter - 最大迭代次数
+Returns:
+    无
+"""
+def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
+    #转换为numpy的mat存储
+    dataMatrix = np.mat(dataMatIn); labelMat = np.mat(classLabels).transpose()
+    #初始化b参数，统计dataMatrix的维度
+    b = 0; m,n = np.shape(dataMatrix)
+    #初始化alpha参数，设为0
+    alphas = np.mat(np.zeros((m,1)))
+    #初始化迭代次数
+    iter_num = 0
+    #最多迭代matIter次
+    while (iter_num < maxIter):
+        alphaPairsChanged = 0
+        for i in range(m):
+            #步骤1：计算误差Ei
+            fXi = float(np.multiply(alphas,labelMat).T*(dataMatrix*dataMatrix[i,:].T)) + b
+            Ei = fXi - float(labelMat[i])
+            #优化alpha，更设定一定的容错率。
+            if ((labelMat[i]*Ei < -toler) and (alphas[i] < C)) or ((labelMat[i]*Ei > toler) and (alphas[i] > 0)):
+                #随机选择另一个与alpha_i成对优化的alpha_j
+                j = selectJrand(i,m)
+                #步骤1：计算误差Ej
+                fXj = float(np.multiply(alphas,labelMat).T*(dataMatrix*dataMatrix[j,:].T)) + b
+                Ej = fXj - float(labelMat[j])
+                #保存更新前的aplpha值，使用深拷贝
+                alphaIold = alphas[i].copy(); alphaJold = alphas[j].copy();
+                #步骤2：计算上下界L和H
+                if (labelMat[i] != labelMat[j]):
+                    L = max(0, alphas[j] - alphas[i])
+                    H = min(C, C + alphas[j] - alphas[i])
+                else:
+                    L = max(0, alphas[j] + alphas[i] - C)
+                    H = min(C, alphas[j] + alphas[i])
+                if L==H: print("L==H"); continue
+                #步骤3：计算eta
+                eta = 2.0 * dataMatrix[i,:]*dataMatrix[j,:].T - dataMatrix[i,:]*dataMatrix[i,:].T - dataMatrix[j,:]*dataMatrix[j,:].T
+                if eta >= 0: print("eta>=0"); continue
+                #步骤4：更新alpha_j
+                alphas[j] -= labelMat[j]*(Ei - Ej)/eta
+                #步骤5：修剪alpha_j
+                alphas[j] = clipAlpha(alphas[j],H,L)
+                if (abs(alphas[j] - alphaJold) < 0.00001): print("alpha_j变化太小"); continue
+                #步骤6：更新alpha_i
+                alphas[i] += labelMat[j]*labelMat[i]*(alphaJold - alphas[j])
+                #步骤7：更新b_1和b_2
+                b1 = b - Ei- labelMat[i]*(alphas[i]-alphaIold)*dataMatrix[i,:]*dataMatrix[i,:].T - labelMat[j]*(alphas[j]-alphaJold)*dataMatrix[i,:]*dataMatrix[j,:].T
+                b2 = b - Ej- labelMat[i]*(alphas[i]-alphaIold)*dataMatrix[i,:]*dataMatrix[j,:].T - labelMat[j]*(alphas[j]-alphaJold)*dataMatrix[j,:]*dataMatrix[j,:].T
+                #步骤8：根据b_1和b_2更新b
+                if (0 < alphas[i]) and (C > alphas[i]): b = b1
+                elif (0 < alphas[j]) and (C > alphas[j]): b = b2
+                else: b = (b1 + b2)/2.0
+                #统计优化次数
+                alphaPairsChanged += 1
+                #打印统计信息
+                print("第%d次迭代 样本:%d, alpha优化次数:%d" % (iter_num,i,alphaPairsChanged))
+        #更新迭代次数
+        if (alphaPairsChanged == 0): iter_num += 1
+        else: iter_num = 0
+        print("迭代次数: %d" % iter_num)
+    return b,alphas
+```
+
