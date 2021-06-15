@@ -654,7 +654,7 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     - 同时，sag每次仅仅使用了部分样本进行梯度迭代，所以当样本量少的时候不要选择它，而如果样本量非常大，比如大于10万，sag是第一选择。但是sag不能用于L1正则化，所以当你有大量的样本，又需要L1正则化的话就要自己做取舍了。要么通过对样本采样来降低样本量，要么回到L2正则化。
     - 从上面的描述，大家可能觉得，既然newton-cg, lbfgs和sag这么多限制，如果不是大样本，我们选择liblinear不就行了嘛！错，因为liblinear也有自己的弱点！我们知道，逻辑回归有二元逻辑回归和多元逻辑回归。对于多元逻辑回归常见的有one-vs-rest(OvR)和many-vs-many(MvM)两种。而MvM一般比OvR分类相对准确一些。郁闷的是liblinear只支持OvR，不支持MvM，这样如果我们需要相对精确的多元逻辑回归时，就不能选择liblinear了。也意味着如果我们需要相对精确的多元逻辑回归不能使用L1正则化了。
 
-### 支持向量机（SVM）
+### 线性SVM
 
 分类算法，寻找一个最优化的“决策面”。一个最优化问题通常由两个基本的因素：（1）目标函数，也就是你希望什么东西的什么指标达到最好；（2）优化对象，你期望通过改变哪些因素来使你的目标函数达到最优。在线性SVM算法中，目标函数显然就是那个"分类间隔"，而优化对象则是决策面。所以要对SVM问题进行数学建模，首先要对上述两个对象（“分类间隔"和"决策面”）进行数学描述。按照一般的思维习惯，我们先描述决策面。
 
@@ -668,7 +668,7 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
 
 二维空间下的方程表示为： $y = ax +b$
 
-向量化表示为：$w^T + \gamma = 0$，其中$w = [w_1,w_2]^T,x = [x_1,x_2]^T$
+向量化表示为：$w^Tx + \gamma = 0$，其中$w = [w_1,w_2]^T,x = [x_1,x_2]^T$
 
 将其退广到高维空间上时公式没变，不同之处在于$w = [w_1,w_2,...,w_n]^T,x = [x_1,x_2,...,x_n]^T$
 
@@ -792,3 +792,373 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
     return b,alphas
 ```
 
+### 非线性SVM
+
+#### 核技巧
+
+我们已经了解到，SVM如何处理线性可分的情况，而对于非线性的情况，SVM的处理方式就是选择一个核函数。简而言之：在线性不可分的情况下，SVM通过某种事先选择的非线性映射（核函数）将输入变量映到一个高维特征空间，将其变成在高维空间线性可分，在这个高维空间中构造最优分类超平面。
+
+在线性可分的情况下，最终的超平面方程为：
+$$
+f(x) = \sum_{i=1}^{n}\alpha_iy_ix_i^Tx+b
+$$
+将上述公式用内积来表示：
+$$
+f(x) = \sum_{i=1}^{n}\alpha_iy_i<x_i,x>+b
+$$
+对于线性不可分，我们使用一个非线性映射，将数据映射到特征空间，在特征空间中使用线性学习器，分类函数变形如下：
+$$
+f(x) = \sum_{i=1}^{n}\alpha_iy_i<\phi(x_i),\phi(x)>+b
+$$
+其中ϕ从输入空间(X)到某个特征空间(F)的映射，这意味着建立非线性学习器分为两步
+
+- 首先使用一个非线性映射将数据变换到一个特征空间F
+- 然后在特征空间使用线性学习器分类
+
+如果有一种方法可以**在特征空间中直接计算内积<ϕ(x_i),ϕ(x)>**，就像在原始输入点的函数中一样，就有可能将两个步骤融合到一起建立一个分线性的学习器，**这样直接计算的方法称为核函数方法**
+
+这里直接给出一个定义：核是一个函数k，对所有x,z∈X，满足k(x,z)=<ϕ(x_i),ϕ(x)>，这里ϕ(·)是从原始输入空间X到内积空间F的映射。
+
+可以把核函数想象成一个包装器或者是接口，它能把数据从某个很难处理的形式转换成为另一个较容易处理的形式。
+
+#### 径向基核函数
+
+径向基函数是SVM中常用的一个核函数。径向基函数是一个采用向量作为自变量的函数，能够基于向量距离运算输出一个标量。这个距离可以是从<0,0>向量或者其他向量开始计算的距离。径向基函数的高斯版本如下：
+$$
+k(x,y) = exp(\frac{-||x-y||^2}{2\sigma^2})
+$$
+其中，$\sigma$是用户定义的用于确定到达率或者函数值跌落到0的速度参数。上述高斯核函数将数据从其特征空间映射到更高维的空间，具体来说这里是映射到一个无穷维的空间。
+
+#### 完整的SMO算法
+
+完整版Platt SMO算法是通过一个外循环来选择违反KKT条件的一个乘子，并且其选择过程会在这两种方式之间进行交替：
+
+- 在所有数据集上进行单遍扫描
+- 在非边界α中实现单遍扫描
+
+非边界α指的就是那些不等于边界0或C的α值，并且跳过那些已知的不会改变的α值。所以我们要先建立这些α的列表，用于才能出α的更新状态。
+
+在选择第一个α值后，算法会通过"启发选择方式"选择第二个α值。
+
+```python
+# -*-coding:utf-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+import random
+
+"""
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-10-03
+"""
+
+class optStruct:
+    """
+    数据结构，维护所有需要操作的值
+    Parameters：
+        dataMatIn - 数据矩阵
+        classLabels - 数据标签
+        C - 松弛变量
+        toler - 容错率
+    """
+    def __init__(self, dataMatIn, classLabels, C, toler):
+        self.X = dataMatIn                                #数据矩阵
+        self.labelMat = classLabels                        #数据标签
+        self.C = C                                         #松弛变量
+        self.tol = toler                                 #容错率
+        self.m = np.shape(dataMatIn)[0]                 #数据矩阵行数
+        self.alphas = np.mat(np.zeros((self.m,1)))         #根据矩阵行数初始化alpha参数为0   
+        self.b = 0                                         #初始化b参数为0
+        self.eCache = np.mat(np.zeros((self.m,2)))         #根据矩阵行数初始化虎误差缓存，第一列为是否有效的标志位，第二列为实际的误差E的值。
+
+def loadDataSet(fileName):
+    """
+    读取数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        dataMat - 数据矩阵
+        labelMat - 数据标签
+    """
+    dataMat = []; labelMat = []
+    fr = open(fileName)
+    for line in fr.readlines():                                     #逐行读取，滤除空格等
+        lineArr = line.strip().split('\t')
+        dataMat.append([float(lineArr[0]), float(lineArr[1])])      #添加数据
+        labelMat.append(float(lineArr[2]))                          #添加标签
+    return dataMat,labelMat
+
+def calcEk(oS, k):
+    """
+    计算误差
+    Parameters：
+        oS - 数据结构
+        k - 标号为k的数据
+    Returns:
+        Ek - 标号为k的数据误差
+    """
+    fXk = float(np.multiply(oS.alphas,oS.labelMat).T*(oS.X*oS.X[k,:].T) + oS.b)
+    Ek = fXk - float(oS.labelMat[k])
+    return Ek
+
+def selectJrand(i, m):
+    """
+    函数说明:随机选择alpha_j的索引值
+
+    Parameters:
+        i - alpha_i的索引值
+        m - alpha参数个数
+    Returns:
+        j - alpha_j的索引值
+    """
+    j = i                                 #选择一个不等于i的j
+    while (j == i):
+        j = int(random.uniform(0, m))
+    return j
+
+def selectJ(i, oS, Ei):
+    """
+    内循环启发方式2
+    Parameters：
+        i - 标号为i的数据的索引值
+        oS - 数据结构
+        Ei - 标号为i的数据误差
+    Returns:
+        j, maxK - 标号为j或maxK的数据的索引值
+        Ej - 标号为j的数据误差
+    """
+    maxK = -1; maxDeltaE = 0; Ej = 0                         #初始化
+    oS.eCache[i] = [1,Ei]                                      #根据Ei更新误差缓存
+    validEcacheList = np.nonzero(oS.eCache[:,0].A)[0]        #返回误差不为0的数据的索引值
+    if (len(validEcacheList)) > 1:                            #有不为0的误差
+        for k in validEcacheList:                           #遍历,找到最大的Ek
+            if k == i: continue                             #不计算i,浪费时间
+            Ek = calcEk(oS, k)                                #计算Ek
+            deltaE = abs(Ei - Ek)                            #计算|Ei-Ek|
+            if (deltaE > maxDeltaE):                        #找到maxDeltaE
+                maxK = k; maxDeltaE = deltaE; Ej = Ek
+        return maxK, Ej                                        #返回maxK,Ej
+    else:                                                   #没有不为0的误差
+        j = selectJrand(i, oS.m)                            #随机选择alpha_j的索引值
+        Ej = calcEk(oS, j)                                    #计算Ej
+    return j, Ej                                             #j,Ej
+
+def updateEk(oS, k):
+    """
+    计算Ek,并更新误差缓存
+    Parameters：
+        oS - 数据结构
+        k - 标号为k的数据的索引值
+    Returns:
+        无
+    """
+    Ek = calcEk(oS, k)                                        #计算Ek
+    oS.eCache[k] = [1,Ek]                                    #更新误差缓存
+
+
+def clipAlpha(aj,H,L):
+    """
+    修剪alpha_j
+    Parameters:
+        aj - alpha_j的值
+        H - alpha上限
+        L - alpha下限
+    Returns:
+        aj - 修剪后的alpah_j的值
+    """
+    if aj > H:
+        aj = H
+    if L > aj:
+        aj = L
+    return aj
+
+def innerL(i, oS):
+    """
+    优化的SMO算法
+    Parameters：
+        i - 标号为i的数据的索引值
+        oS - 数据结构
+    Returns:
+        1 - 有任意一对alpha值发生变化
+        0 - 没有任意一对alpha值发生变化或变化太小
+    """
+    #步骤1：计算误差Ei
+    Ei = calcEk(oS, i)
+    #优化alpha,设定一定的容错率。
+    if ((oS.labelMat[i] * Ei < -oS.tol) and (oS.alphas[i] < oS.C)) or ((oS.labelMat[i] * Ei > oS.tol) and (oS.alphas[i] > 0)):
+        #使用内循环启发方式2选择alpha_j,并计算Ej
+        j,Ej = selectJ(i, oS, Ei)
+        #保存更新前的aplpha值，使用深拷贝
+        alphaIold = oS.alphas[i].copy(); alphaJold = oS.alphas[j].copy();
+        #步骤2：计算上下界L和H
+        if (oS.labelMat[i] != oS.labelMat[j]):
+            L = max(0, oS.alphas[j] - oS.alphas[i])
+            H = min(oS.C, oS.C + oS.alphas[j] - oS.alphas[i])
+        else:
+            L = max(0, oS.alphas[j] + oS.alphas[i] - oS.C)
+            H = min(oS.C, oS.alphas[j] + oS.alphas[i])
+        if L == H:
+            print("L==H")
+            return 0
+        #步骤3：计算eta
+        eta = 2.0 * oS.X[i,:] * oS.X[j,:].T - oS.X[i,:] * oS.X[i,:].T - oS.X[j,:] * oS.X[j,:].T
+        if eta >= 0:
+            print("eta>=0")
+            return 0
+        #步骤4：更新alpha_j
+        oS.alphas[j] -= oS.labelMat[j] * (Ei - Ej)/eta
+        #步骤5：修剪alpha_j
+        oS.alphas[j] = clipAlpha(oS.alphas[j],H,L)
+        #更新Ej至误差缓存
+        updateEk(oS, j)
+        if (abs(oS.alphas[j] - alphaJold) < 0.00001):
+            print("alpha_j变化太小")
+            return 0
+        #步骤6：更新alpha_i
+        oS.alphas[i] += oS.labelMat[j]*oS.labelMat[i]*(alphaJold - oS.alphas[j])
+        #更新Ei至误差缓存
+        updateEk(oS, i)
+        #步骤7：更新b_1和b_2
+        b1 = oS.b - Ei- oS.labelMat[i]*(oS.alphas[i]-alphaIold)*oS.X[i,:]*oS.X[i,:].T - oS.labelMat[j]*(oS.alphas[j]-alphaJold)*oS.X[i,:]*oS.X[j,:].T
+        b2 = oS.b - Ej- oS.labelMat[i]*(oS.alphas[i]-alphaIold)*oS.X[i,:]*oS.X[j,:].T - oS.labelMat[j]*(oS.alphas[j]-alphaJold)*oS.X[j,:]*oS.X[j,:].T
+        #步骤8：根据b_1和b_2更新b
+        if (0 < oS.alphas[i]) and (oS.C > oS.alphas[i]): oS.b = b1
+        elif (0 < oS.alphas[j]) and (oS.C > oS.alphas[j]): oS.b = b2
+        else: oS.b = (b1 + b2)/2.0
+        return 1
+    else:
+        return 0
+
+def smoP(dataMatIn, classLabels, C, toler, maxIter):
+    """
+    完整的线性SMO算法
+    Parameters：
+        dataMatIn - 数据矩阵
+        classLabels - 数据标签
+        C - 松弛变量
+        toler - 容错率
+        maxIter - 最大迭代次数
+    Returns:
+        oS.b - SMO算法计算的b
+        oS.alphas - SMO算法计算的alphas
+    """
+    oS = optStruct(np.mat(dataMatIn), np.mat(classLabels).transpose(), C, toler)      #初始化数据结构
+    iter = 0                                                                          #初始化当前迭代次数
+    entireSet = True; alphaPairsChanged = 0
+    while (iter < maxIter) and ((alphaPairsChanged > 0) or (entireSet)):  #遍历整个数据集都alpha也没有更新或者超过最大迭代次数,则退出循环
+        alphaPairsChanged = 0
+        if entireSet:                                                                 #遍历整个数据集                           
+            for i in range(oS.m):       
+                alphaPairsChanged += innerL(i,oS)                                     #使用优化的SMO算法
+                print("全样本遍历:第%d次迭代 样本:%d, alpha优化次数:%d" % (iter,i,alphaPairsChanged))
+            iter += 1
+        else:                                                                         #遍历非边界值
+            nonBoundIs = np.nonzero((oS.alphas.A > 0) * (oS.alphas.A < C))[0]     #遍历不在边界0和C的alpha
+            for i in nonBoundIs:
+                alphaPairsChanged += innerL(i,oS)
+                print("非边界遍历:第%d次迭代 样本:%d, alpha优化次数:%d" % (iter,i,alphaPairsChanged))
+            iter += 1
+        if entireSet:                                                           #遍历一次后改为非边界遍历
+            entireSet = False
+        elif (alphaPairsChanged == 0):                                     #如果alpha没有更新,计算全样本遍历
+            entireSet = True 
+        print("迭代次数: %d" % iter)
+    return oS.b,oS.alphas                                                 #返回SMO算法计算的b和alphas
+
+
+def showClassifer(dataMat, classLabels, w, b):
+    """
+    分类结果可视化
+    Parameters:
+        dataMat - 数据矩阵
+        w - 直线法向量
+        b - 直线解决
+    Returns:
+        无
+    """
+    #绘制样本点
+    data_plus = []                                  #正样本
+    data_minus = []                                 #负样本
+    for i in range(len(dataMat)):
+        if classLabels[i] > 0:
+            data_plus.append(dataMat[i])
+        else:
+            data_minus.append(dataMat[i])
+    data_plus_np = np.array(data_plus)              #转换为numpy矩阵
+    data_minus_np = np.array(data_minus)            #转换为numpy矩阵
+    plt.scatter(np.transpose(data_plus_np)[0], np.transpose(data_plus_np)[1], s=30, alpha=0.7)   #正样本散点图
+    plt.scatter(np.transpose(data_minus_np)[0], np.transpose(data_minus_np)[1], s=30, alpha=0.7) #负样本散点图
+    #绘制直线
+    x1 = max(dataMat)[0]
+    x2 = min(dataMat)[0]
+    a1, a2 = w
+    b = float(b)
+    a1 = float(a1[0])
+    a2 = float(a2[0])
+    y1, y2 = (-b- a1*x1)/a2, (-b - a1*x2)/a2
+    plt.plot([x1, x2], [y1, y2])
+    #找出支持向量点
+    for i, alpha in enumerate(alphas):
+        if abs(alpha) > 0:
+            x, y = dataMat[i]
+            plt.scatter([x], [y], s=150, c='none', alpha=0.7, linewidth=1.5, edgecolor='red')
+    plt.show()
+
+
+def calcWs(alphas,dataArr,classLabels):
+    """
+    计算w
+    Parameters:
+        dataArr - 数据矩阵
+        classLabels - 数据标签
+        alphas - alphas值
+    Returns:
+        w - 计算得到的w
+    """
+    X = np.mat(dataArr); labelMat = np.mat(classLabels).transpose()
+    m,n = np.shape(X)
+    w = np.zeros((n,1))
+    for i in range(m):
+        w += np.multiply(alphas[i]*labelMat[i],X[i,:].T)
+    return w
+
+if __name__ == '__main__':
+    dataArr, classLabels = loadDataSet('testSet.txt')
+    b, alphas = smoP(dataArr, classLabels, 0.6, 0.001, 40)
+    w = calcWs(alphas,dataArr, classLabels)
+    showClassifer(dataArr, classLabels, w, b)
+
+```
+
+#### sklearn构建SVM分类器
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210615202142046.png" alt="image-20210615202142046" style="zoom:80%;" />
+
+参数说明如下：
+
+- C：惩罚项，float类型，可选参数，默认为1.0，C越大，即对分错样本的惩罚程度越大，因此在训练样本中准确率越高，但是泛化能力降低，也就是对测试数据的分类准确率降低。相反，减小C的话，容许训练样本中有一些误分类错误样本，泛化能力强。对于训练样本带有噪声的情况，一般采用后者，把训练样本集中错误分类的样本作为噪声。
+- kernel：核函数类型，str类型，默认为’rbf’。可选参数为：
+  - ‘linear’：线性核函数
+  - ‘poly’：多项式核函数
+  - ‘rbf’：径像核函数/高斯核
+  - ‘sigmod’：sigmod核函数
+  - ‘precomputed’：核矩阵
+  - precomputed表示自己提前计算好核函数矩阵，这时候算法内部就不再用核函数去计算核矩阵，而是直接用你给的核矩阵，核矩阵需要为n*n的。
+- degree：多项式核函数的阶数，int类型，可选参数，默认为3。这个参数只对多项式核函数有用，是指多项式核函数的阶数n，如果给的核函数参数是其他核函数，则会自动忽略该参数。
+- gamma：核函数系数，float类型，可选参数，默认为auto。只对’rbf’ ,‘poly’ ,'sigmod’有效。如果gamma为auto，代表其值为样本特征数的倒数，即1/n_features。
+- coef0：核函数中的独立项，float类型，可选参数，默认为0.0。只有对’poly’ 和,'sigmod’核函数有用，是指其中的参数c。
+- probability：是否启用概率估计，bool类型，可选参数，默认为False，这必须在调用fit()之前启用，并且会fit()方法速度变慢。
+- shrinking：是否采用启发式收缩方式，bool类型，可选参数，默认为True。
+- tol：svm停止训练的误差精度，float类型，可选参数，默认为1e^-3。
+- cache_size：内存大小，float类型，可选参数，默认为200。指定训练所需要的内存，以MB为单位，默认为200MB。
+- class_weight：类别权重，dict类型或str类型，可选参数，默认为None。给每个类别分别设置不同的惩罚参数C，如果没有给，则会给所有类别都给C=1，即前面参数指出的参数C。如果给定参数’balance’，则使用y的值自动调整与输入数据中的类频率成反比的权重。
+- verbose：是否启用详细输出，bool类型，默认为False，此设置利用libsvm中的每个进程运行时设置，如果启用，可能无法在多线程上下文中正常工作。一般情况都设为False，不用管它。
+- max_iter：最大迭代次数，int类型，默认为-1，表示不限制。
+- decision_function_shape：决策函数类型，可选参数’ovo’和’ovr’，默认为’ovr’。'ovo’表示one vs one，'ovr’表示one vs rest。
+- random_state：数据洗牌时的种子值，int类型，可选参数，默认为None。伪随机数发生器的种子,在混洗数据时用于概率估计。
+  
