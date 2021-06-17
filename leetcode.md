@@ -500,3 +500,104 @@ class Solution {
 }
 ```
 
+#### 65、有效数字
+
+有效数字（按顺序）可以分成以下几个部分：
+
+一个 小数 或者 整数
+（可选）一个 'e' 或 'E' ，后面跟着一个 整数
+小数（按顺序）可以分成以下几个部分：
+
+（可选）一个符号字符（'+' 或 '-'）
+下述格式之一：
+至少一位数字，后面跟着一个点 '.'
+至少一位数字，后面跟着一个点 '.' ，后面再跟着至少一位数字
+一个点 '.' ，后面跟着至少一位数字
+整数（按顺序）可以分成以下几个部分：
+
+（可选）一个符号字符（'+' 或 '-'）
+至少一位数字
+部分有效数字列举如下：
+
+["2", "0089", "-0.1", "+3.14", "4.", "-.9", "2e10", "-90E3", "3e+7", "+6e-1", "53.5e93", "-123.456e789"]
+部分无效数字列举如下：
+
+["abc", "1a", "1e", "e3", "99e2.5", "--6", "-+3", "95a54e53"]
+给你一个字符串 s ，如果 s 是一个 有效数字 ，请返回 true 。
+
+示例 1：
+
+```
+输入：s = "0"
+输出：true
+```
+
+**解题思路**：
+
+确定有限状态自动机
+
+> 初始状态
+>
+> 符号位
+>
+> 整数部分
+>
+> 左侧有整数的小数点
+>
+> 左侧无整数的小数点（根据前面的第二条额外规则，需要对左侧有无整数的两种小数点做区分）
+>
+> 小数部分
+>
+> 字符e
+>
+> 指数部分的符号位
+>
+> 指数部分的整数部分
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210617092443450.png" alt="image-20210617092443450" style="zoom:80%;" />
+
+**题解代码**：
+
+```java
+class Solution65 {
+    public boolean isNumber(String s) {
+        boolean ans = true, occur = false;
+        int n = s.length();
+        for (int i=0; i<n; i++) {
+            char ch = s.charAt(i);
+            if (ch == '+' || ch == '-') {
+                if (!(i < n-1 && ((s.charAt(i+1)-'0' >= 0 && s.charAt(i+1)-'0' <= 9) || s.charAt(i+1) == '.')))
+                    return false;
+            }
+            else if (ch == '.') {
+                if (!((i > 0 && s.charAt(i-1)-'0'>=0 && s.charAt(i-1)-'0'<=9) ||
+                        (i < n-1 && s.charAt(i+1)-'0'>=0 && s.charAt(i+1)-'0'<=9)) || occur)
+                    return false;
+                occur = true;
+            }
+            else if (ch == 'e' || ch == 'E') {
+                if (i == 0 || i == n-1)
+                    return false;
+                else {
+                    for (int j=i+1; j<n; j++) {
+                        char c = s.charAt(j);
+                        if ((c == '+' || c == '-') && !(j == i+1 && j != n-1))
+                            return false;
+                        if (c == '.' || (c-'a'>=0 && c-'a'<=25) || (c-'A'>=0 && c-'A'<=25))
+                            return false;
+                    }
+                    break;
+                }
+            }
+            else if (ch-'0' >= 0 && ch-'0'<=9) {
+                if (i < n-1 && (s.charAt(i+1) == '+' || s.charAt(i+1) == '-'))
+                    return false;
+            }
+            else
+                return false;
+        }
+        return ans;
+    }
+}
+```
+
