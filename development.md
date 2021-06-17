@@ -227,6 +227,8 @@
 - 整合shiro 安全框架
 - 整合elasticsearch 全文搜索
 - hutool工具包，Hutool是一个Java工具包类库，对文件、流、加密解密、转码、正则、线程、XML等JDK方法进行封装，组成各种Util工具类 [Hutool](https://www.hutool.cn/)
+- RestTemplate
+- @Resource @@Autowired
 
 #### Windows相关
 
