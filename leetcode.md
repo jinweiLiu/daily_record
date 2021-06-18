@@ -601,3 +601,64 @@ class Solution65 {
 }
 ```
 
+#### 483、最小好进制
+
+对于给定的整数 n, 如果n的k（k>=2）进制数的所有数位全为1，则称 k（k>=2）是 n 的一个好进制。
+
+以字符串的形式给出 n, 以字符串的形式返回 n 的最小好进制。
+
+示例 1：
+
+```
+输入："13"
+输出："3"
+解释：13 的 3 进制是 111。
+```
+
+示例 2：
+
+```
+输入："4681"
+输出："8"
+解释：4681 的 8 进制是 11111。
+```
+
+**解题思路**：
+
+假设正整数 n 在 $k~(k \geq 2)$ 进制下的所有数位都为 1，且位数为 m + 1，那么有：
+
+$n = k^0 + k^1 + k^2 + \dots + k^m$
+首先讨论两种特殊情况：
+
+m=0，此时 $n=1$，而题目保证 $n \geq 3$，所以本题中 $m>0$。
+m=1，此时 $n=(11)_k$，即 $k=n-1\geq 2$，这保证了本题有解。
+
+然后我们分别证明一般情况下的两个结论，以帮助解决本题。
+
+**结论一：** $m < log_k{n}$  (等比数列求和)
+
+**结论二：** $k <\sqrt[m]{n} < k+1$  (二项式定理)
+
+**题解代码**：
+
+```java
+class Solution {
+    public String smallestGoodBase(String n) {
+        long nVal = Long.parseLong(n);
+        int mMax = (int) Math.floor(Math.log(nVal) / Math.log(2));
+        for (int m = mMax; m > 1; m--) {
+            int k = (int) Math.pow(nVal, 1.0 / m);
+            long mul = 1, sum = 1;
+            for (int i = 0; i < m; i++) {
+                mul *= k;
+                sum += mul;
+            }
+            if (sum == nVal) {
+                return Integer.toString(k);
+            }
+        }
+        return Long.toString(nVal - 1);
+    }
+}
+```
+
