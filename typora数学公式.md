@@ -26,3 +26,14 @@
   - \sqrt{x^3}   $\sqrt{x^3}$
   - \sqrt[3]{x}   $\sqrt[3]{x}$
 
+- 属于/不属于
+
+  \in  $\in$
+
+  \notin $\notin$
+
+- 希腊字符
+
+  \alpha
+
+  \beta
