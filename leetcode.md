@@ -725,7 +725,70 @@ class Solution {
         if((mask & masks.get(pos)) == 0){ // mask 和 masks[pos] 无公共元素
             backtrack(masks,pos+1,mask | masks.get(pos));
         }
-        backtrack(masks,pos+1,mask);
+        backtrack(masks,pos+1,mask);  //不选择当前字符
+    }
+}
+```
+
+#### 剑指 Offer 38. 字符串的排列
+
+输入一个字符串，打印出该字符串中字符的所有排列。
+
+你可以以任意顺序返回这个字符串数组，但里面不能有重复元素。
+
+示例:
+
+```
+输入：s = "abc"
+输出：["abc","acb","bac","bca","cab","cba"]
+```
+
+**解题思路**：
+
+回溯法，需要去重，去重代码：
+
+```java
+if(vis[j] || (j>0 && !vis[j-1] && arr[j-1] == arr[j])){
+    continue;
+}
+```
+
+**题解代码**：
+
+```java
+class Solution {
+    List<String> res;
+    boolean[] vis;
+    public String[] permutation(String s) {
+        int n = s.length();
+        res = new ArrayList<String>();
+        vis = new boolean[n];
+        char[] arr = s.toCharArray();
+        Arrays.sort(arr);
+        StringBuffer perm = new StringBuffer();
+        backtrack(arr, n, perm);
+        int size = res.size();
+        String[] recArr = new String[size];
+        for (int i = 0; i < size; i++) {
+            recArr[i] = res.get(i);
+        }
+        return recArr;
+    }
+    public void backtrack(char []arr, int n, StringBuffer perm){
+        if(perm.length() == n){
+            res.add(perm.toString());
+            return;
+        }
+        for(int j = 0; j < n; ++j){
+            if(vis[j] || (j>0 && !vis[j-1] && arr[j-1] == arr[j])){
+                continue;
+            }
+            vis[j] = true;
+            perm.append(arr[j]);
+            backtrack(arr,n,perm);
+            perm.deleteCharAt(perm.length() - 1);
+            vis[j] = false;
+        }
     }
 }
 ```
