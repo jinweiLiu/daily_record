@@ -13,6 +13,13 @@
   http://127.0.0.1:16006
   ```
 
+- 开启visdom
+
+  ```bash
+  nohup python -m visdom.server &
+  #远程服务器映射到本地端口
+  ssh -L 8097:127.0.0.1:8097 dell@202.120.92.171
+  ```
 
 ### 代码相关
 
@@ -189,3 +196,102 @@ random=1                     ★ 为1打开随机多尺度训练，为0则关闭
   - AP<sub>S</sub> : 像素面积小于 ![[公式]](https://www.zhihu.com/equation?tex=32%5E2) 的目标框的AP测量值
   - AP<sub>M</sub> : 像素面积在![[公式]](https://www.zhihu.com/equation?tex=32%5E2)- ![[公式]](https://www.zhihu.com/equation?tex=96%5E2)之间目标框的测量值
   - AP<sub>L</sub> : 像素面积大于 ![[公式]](https://www.zhihu.com/equation?tex=96%5E2) 的目标框的AP测量值
+
+#### 标注转换
+
+- 路径转换
+
+  ```python
+  import os
+  
+  data = 'main/test.txt'
+  generate = 'test.txt'
+  
+  with open(data,'r') as f:
+      with open(generate,'w+') as g:
+        for line in f.readlines():
+            line = 'data/voc/images/' + line.rstrip() +'.jpg'
+            g.write(line + "\n")
+  ```
+
+- 文件转换
+
+  ```python
+  import xml.etree.ElementTree as ET
+  import pickle
+  import os
+  from os import listdir, getcwd
+  from os.path import join
+   
+  sets=['trainval','test']  # 我只用了VOC
+   
+  classes = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19"]  # 修改为自己的label
+   
+  def convert(size, box):
+      dw = 1./(size[0])  # 有的人运行这个脚本可能报错，说不能除以0什么的，你可以变成dw = 1./((size[0])+0.1)
+      dh = 1./(size[1])  # 有的人运行这个脚本可能报错，说不能除以0什么的，你可以变成dh = 1./((size[0])+0.1)
+      x = (box[0] + box[1])/2.0 - 1
+      y = (box[2] + box[3])/2.0 - 1
+      w = box[1] - box[0]
+      h = box[3] - box[2]
+      x = x*dw
+      w = w*dw
+      y = y*dh
+      h = h*dh
+      return (x,y,w,h)
+   
+  def convert_annotation(image_id):
+      in_file = open('VOC/Annotations/%s.xml'%image_id)
+      out_file = open('VOC/Labels/%s.txt'%image_id, 'w')
+      tree=ET.parse(in_file)
+      root = tree.getroot()
+      size = root.find('size')
+      w = int(size.find('width').text)
+      h = int(size.find('height').text)
+  
+      obj = root.find("object")
+      xmlbox = obj.find('bndbox')
+      b = (float(xmlbox.find('xmin').text), float(xmlbox.find('xmax').text), float(xmlbox.find('ymin').text), float(xmlbox.find('ymax').text))
+      bb = convert((w,h), b)
+      #return str(0) + " " + " ".join([str(a) for a in bb]) + '\n'
+      out_file.write(str(0) + " " + " ".join([str(a) for a in bb]) + '\n')
+      
+      '''
+      for obj in root.iter('object'):
+          difficult = obj.find('difficult').text
+          cls = obj.find('name').text
+          if cls not in classes or int(difficult)==1:
+              continue
+          cls_id = classes.index(cls)
+          xmlbox = obj.find('bndbox')
+          b = (float(xmlbox.find('xmin').text), float(xmlbox.find('xmax').text), float(xmlbox.find('ymin').text), float(xmlbox.find('ymax').text))
+          bb = convert((w,h), b)
+          out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
+      '''
+  
+  if __name__ == "__main__":
+      '''
+      wd = 'data/voc/images'
+   
+      for image_set in sets:
+          if not os.path.exists('VOC/Labels/'):
+              os.makedirs('VOC/Labels/')
+          image_ids = open('VOC/ImageSets/Main/%s.txt'%image_set).read().strip().split()
+          list_file = open('VOC/%s.txt'%(image_set), 'w')
+          #out_file = open('VOC/Labels/%s.txt'%(image_set), 'w')
+          for image_id in image_ids:
+              list_file.write('%s/%s.png\n'%(wd,image_id))
+              #out_file.write(convert_annotation(image_id))
+              convert_annotation(image_id)
+          list_file.close()
+          #out_file.close()
+      '''
+      #print(convert((353,500),(48,195,240,371)))
+   
+  # 这块是路径拼接，暂时用不上，先都注释了
+  # os.system("cat 2007_train.txt 2007_val.txt 2012_train.txt 2012_val.txt > train.txt")
+  # os.system("cat 2007_train.txt 2007_val.txt 2007_test.txt 2012_train.txt 2012_val.txt > train.all.txt")
+  ```
+
+  
+
