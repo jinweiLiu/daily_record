@@ -197,7 +197,7 @@ random=1                     ★ 为1打开随机多尺度训练，为0则关闭
   - AP<sub>M</sub> : 像素面积在![[公式]](https://www.zhihu.com/equation?tex=32%5E2)- ![[公式]](https://www.zhihu.com/equation?tex=96%5E2)之间目标框的测量值
   - AP<sub>L</sub> : 像素面积大于 ![[公式]](https://www.zhihu.com/equation?tex=96%5E2) 的目标框的AP测量值
 
-#### 标注转换
+#### VOC标注转换
 
 - 路径转换
 
