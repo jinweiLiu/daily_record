@@ -37,3 +37,19 @@
   \alpha
 
   \beta
+  
+- 大括号
+
+  L = -ylogy'-(1-y)log(1-y') = \begin{cases}-logy',& \text{y=1}\\-log(1-y'),& \text{y=0} \end{cases}
+  $$
+  L = -ylogy'-(1-y)log(1-y') = \begin{cases}-logy',& \text{y=1}\\-log(1-y'),& \text{y=0} \end{cases}
+  $$
+
+- 交集和并集
+
+   \cap $\cap$  \bigcap $\bigcap$
+
+  \cup $\cup$  \bigcup $\bigcup$
+
+  
+
