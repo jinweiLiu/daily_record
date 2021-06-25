@@ -293,5 +293,51 @@ random=1                     ★ 为1打开随机多尺度训练，为0则关闭
   # os.system("cat 2007_train.txt 2007_val.txt 2007_test.txt 2012_train.txt 2012_val.txt > train.all.txt")
   ```
 
-  
+#### GIoU
 
+**IoU的不足点：**
+
+- 如果两个目标没有重叠，IoU将会为0，并且不会反应两个目标之间的距离，在这种无重叠目标的情况下，如果IoU用作损失函数，梯度为0，无法优化。
+
+- IoU无法区分两个对象之间不同的对齐方式。更确切地讲，不同方向上有相同交叉级别的两个重叠对象的IoU会完全相等。
+
+  ![image-20210625183258259](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210625183258259.png)
+
+**GIoU:**
+
+对于任意的两个Ａ、B框，首先找到一个能够包住它们的最小方框Ｃ。然后计算C \ (A ∪ B) 的面积与Ｃ的面积的比值，注：C - (A ∪ B) 的面积为C的面积减去A∪B的面积。再用Ａ、Ｂ的IoU值减去这个比值得到GIoU。
+
+![image-20210625182601192](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210625182601192.png)
+$$
+IoU = \frac{|A \cap B|}{|A\cup B|} \\
+GIoU = IoU - \frac{|C-(A\cup B)|}{|C|}
+$$
+
+
+#### Focal Loss
+
+Focal loss主要是为了解决one-stage目标检测中正负样本比例严重失衡的问题。该损失函数降低了大量简单负样本在训练中所占的权重，也可理解为一种困难样本挖掘。
+
+Focal loss是在交叉熵损失函数基础上进行的修改，首先回顾二分类交叉熵损失：
+$$
+L = -ylogy'-(1-y)log(1-y') = \begin{cases}-logy',& \text{y=1}\\-log(1-y'),& \text{y=0} \end{cases}
+$$
+y'是经过激活函数的输出，所以在0-1之间。可见普通的交叉熵对于正样本而言，输出概率越大损失越小。对于负样本而言，输出概率越小则损失越小。此时的损失函数在大量简单样本的迭代过程中比较缓慢且可能无法优化至最优。
+
+Focal loss的改进
+$$
+L_{fl}= \begin{cases}-(1-y')^\gamma logy',& y=1\\ -y'^\gamma log(1-y'), & y=0 \end{cases}
+$$
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210625185606891.png" alt="image-20210625185606891" style="zoom: 67%;" />
+
+首先在原有的基础上加了一个因子，其中gamma>0使得减少易分类样本的损失。使得更关注于困难的、错分的样本。
+
+例如gamma为2，对于正类样本而言，预测结果为0.95肯定是简单样本，所以（1-0.95）的gamma次方就会很小，这时损失函数值就变得更小。而预测概率为0.3的样本其损失相对很大。对于负类样本而言同样，预测0.1的结果应当远比预测0.7的样本损失值要小得多。对于预测概率为0.5时，损失只减少了0.25倍，所以更加关注于这种难以区分的样本。这样减少了简单样本的影响，大量预测概率很小的样本叠加起来后的效应才可能比较有效。
+
+此外，加入平衡因子alpha，用来平衡正负样本本身的比例不均：文中alpha取0.25，即正样本要比负样本占比小，这是因为负例易分。
+$$
+L_{fl}= \begin{cases}-\alpha(1-y')^\gamma logy',& y=1\\ -(1-\alpha)y'^\gamma log(1-y'), & y=0 \end{cases}
+$$
+只添加alpha虽然可以平衡正负样本的重要性，但是无法解决简单与困难样本的问题。
+
+gamma调节简单样本权重降低的速率，当gamma为0时即为交叉熵损失函数，当gamma增加时，调整因子的影响也在增加。实验发现gamma为2是最优。
