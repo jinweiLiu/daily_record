@@ -35,6 +35,12 @@
   firewall-cmd --zone= public --remove-port=80/tcp --permanent # 删除
   ```
 
+- Linux拷贝文件
+
+  ```
+  cp filename 指定路径
+  ```
+
 #### docker相关
 
 - docker使用
