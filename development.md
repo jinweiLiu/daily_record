@@ -222,6 +222,14 @@
   >
   > Hi, John!
 
+- python导入模块失败方法
+
+  > import sys
+  >
+  > sys.path.append("路径")
+  >
+  > print(sys.path)  #查看包含导入模块的路径
+
 #### Spring boot相关
 
 - 整合shiro 安全框架
