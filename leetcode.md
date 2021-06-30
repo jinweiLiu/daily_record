@@ -1156,6 +1156,75 @@ class Solution {
 }
 ```
 
+### DFS
+
+#### 剑指Offer 37. 序列化二叉树
+
+请实现两个函数，分别用来序列化和反序列化二叉树。
+
+你需要设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210630091605259.png" alt="image-20210630091605259" style="zoom:67%;" />
+
+**解题思路**：
+
+先序、中序、后序遍历都可以
+
+这里先序遍历这颗二叉树，遇到空子树的时候序列化成 None，否则继续递归序列化。那么我们如何反序列化呢？首先我们需要根据 , 把原先的序列分割开来得到先序遍历的元素列表，然后从左向右遍历这个序列：
+
+- 如果当前的元素为 None，则当前为空树
+- 否则先解析这棵树的左子树，再解析它的右子树
+
+**题解代码**：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+public class Codec {
+    public String serialize(TreeNode root) {
+        return rserialize(root, "");
+    }
+  
+    public TreeNode deserialize(String data) {
+        String[] dataArray = data.split(",");
+        List<String> dataList = new LinkedList<String>(Arrays.asList(dataArray));
+        return rdeserialize(dataList);
+    }
+
+    public String rserialize(TreeNode root, String str) {
+        if (root == null) {
+            str += "None,";
+        } else {
+            str += str.valueOf(root.val) + ",";
+            str = rserialize(root.left, str);
+            str = rserialize(root.right, str);
+        }
+        return str;
+    }
+  
+    public TreeNode rdeserialize(List<String> dataList) {
+        if (dataList.get(0).equals("None")) {
+            dataList.remove(0);
+            return null;
+        }
+  
+        TreeNode root = new TreeNode(Integer.valueOf(dataList.get(0)));
+        dataList.remove(0);
+        root.left = rdeserialize(dataList);
+        root.right = rdeserialize(dataList);
+    
+        return root;
+    }
+}
+```
+
 ### 动态规划
 
 #### 343、整数拆分
