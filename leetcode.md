@@ -1265,3 +1265,34 @@ class Solution:
         return dp[n]
 ```
 
+#### 96、不同的二叉搜索树
+
+给你一个整数 `n` ，求恰由 `n` 个节点组成且节点值从 `1` 到 `n` 互不相同的 **二叉搜索树** 有多少种？返回满足题意的二叉搜索树的种数。
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210630093131859.png" alt="image-20210630093131859" style="zoom:67%;" />
+
+**解题思路**：
+
+$dp[ \ ]$表示1到i为节点组成的二叉搜索树的个数，例如dp[3]，就是 元素1为头结点搜索树的数量 + 元素2为头结点搜索树的数量 + 元素3为头结点搜索树的数量
+
+ $ dp[i] += dp[$以j为头结点左子树节点数量$] * dp[$以j为头结点右子树节点数量$] $
+
+所以递推公式：$dp[i] += dp[j - 1] * dp[i - j]$ ，j-1 为j为头结点左子树节点数量，i-j 为以j为头结点右子树节点数量
+
+**题解代码**：
+
+```java
+class Solution {
+    public int numTrees(int n) {
+        int []dp = new int[n+1];
+        dp[0] = 1;
+        for(int i= 1; i < n+1; ++i){
+            for(int j = 1; j <= i; ++j){
+                dp[i] += dp[j-1] * dp[i-j];
+            }
+        }
+        return dp[n];
+    }
+}
+```
+

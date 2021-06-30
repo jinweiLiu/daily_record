@@ -13,6 +13,59 @@
   http://127.0.0.1:16006
   ```
 
+- tensorboardX使用
+
+  [详解PyTorch项目使用TensorboardX进行训练可视化](https://blog.csdn.net/bigbennyguo/article/details/87956434)
+
+  - 创建一个SummaryWriter的实例
+
+  ```python
+  from tensorboardX import SummaryWriter
+  
+  #提供一个路径，将使用该路径来保存日志
+  # Creates writer1 object.
+  # The log will be saved in 'runs/exp'
+  writer1 = SummaryWriter('runs/exp')
+  
+  #无参数，默认使用runs/日期时间路径来保存日志
+  # Creates writer2 object with auto generated file name
+  # The log directory will be something like 'runs/Aug20-17-20-33'
+  writer2 = SummaryWriter()
+  
+  #提供一个comment参数，将使用runs/日期时间-comment路径来保存日志
+  # Creates writer3 object with auto generated file name, the comment will be appended to the filename.
+  # The log directory will be something like 'runs/Aug20-17-20-33-resnet'
+  writer3 = SummaryWriter(comment='resnet')
+  ```
+
+  - 使用各种add方法记录数据
+
+    使用add_scalar方法来记录数字常量
+
+    > add_scalar(tag,scalar_value,global_step=None,walltime=None)
+    >
+    > 参数：
+    >
+    > - tag(string): 数据名称，不同名称的数据使用不同曲线展示
+    > - scalar_value(float): 数字常量值
+    > - global_step(int,optional): 训练的step
+    > - walltime(falot,optional):记录发生的时间，默认为time.time()
+
+    需要注意，这里的 scalar_value 一定是 float 类型，如果是 PyTorch scalar tensor，则需要调用 .item() 方法获取其数值。我们一般会使用 add_scalar 方法来记录训练过程的 loss、accuracy、learning rate 等数值的变化，直观地监控训练过程。
+
+    **Example**:
+
+    ```
+    from tensorboardX import SummaryWriter
+    writer = SummaryWriter('runs/scalar_example')
+    for i in range(10):
+        writer.add_scalar('quadratic', i**2, global_step=i)
+        writer.add_scalar('exponential', 2**i, global_step=i)
+    
+    ```
+
+    
+
 - 开启visdom
 
   ```bash
