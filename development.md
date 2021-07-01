@@ -99,6 +99,8 @@
     git  branch -a #列出本地分支和远程分支
   git checkout  #一般用于文件的操作和分支的操作
   git push origin branchName #将本地分支推送到远程仓库上
+   
+  git push --set-upstream origin branchName #gitee提交方式
   ```
 
 #### web相关
