@@ -105,6 +105,12 @@
   git reset --hard HEAD^ #回退到上个版本
   git reset --hard HEAD~3 #回退到前3次提交之前，以此类推，回退到n次提交之前
   git reset --hard commit_id #退到/进到 指定commit的sha码
+  
+  ##本地和远程不同时，会造成冲突，可以使用git stash或者放弃本地修改，直接覆盖
+  git stash
+  
+  git reset -- hard #直接覆盖
+  git pull
   ```
 
 #### web相关
