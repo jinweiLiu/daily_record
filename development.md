@@ -113,6 +113,10 @@
   git pull
   ```
 
+- 设置忽略文件
+
+  .gitignore
+
 #### web相关
 
 - 过滤器（Filter）和拦截器（Interceptor）
