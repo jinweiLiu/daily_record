@@ -793,6 +793,28 @@ class Solution {
 }
 ```
 
+#### 698、划分k个相等的子集
+
+给定一个整数数组  nums 和一个正整数 k，找出是否有可能把这个数组分成 k 个非空子集，其总和都相等。
+
+示例 1：
+
+```
+输入： nums = [4, 3, 2, 3, 5, 2, 1], k = 4
+输出： True
+说明： 有可能将其分成 4 个子集（5），（1,4），（2,3），（2,3）等于总和。
+```
+
+**解题思路**：
+
+
+
+**题解代码**：
+
+```
+
+```
+
 ### 贪心
 
 #### 406、根据身高重建队列
@@ -1403,5 +1425,91 @@ class Solution {
         return dp[n];
     }
 }
+```
+
+#### 416、分割等和子集
+
+给你一个 只包含正整数 的 非空 数组 nums 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+
+示例 1：
+
+```
+输入：nums = [1,5,11,5]
+输出：true
+解释：数组可以分割成 [1, 5, 5] 和 [11] 。
+```
+
+示例 2：
+
+```
+输入：nums = [1,2,3,5]
+输出：false
+解释：数组不能分割成两个元素和相等的子集
+```
+
+**解题思路**：
+
+DFS 或者 动态规划
+
+**题解代码**：
+
+动态规划
+
+```java
+class Solution {
+    public boolean canPartition(int[] nums) {
+        int n = nums.length;
+        if (n < 2) {
+            return false;
+        }
+        int sum = 0, maxNum = 0;
+        for (int num : nums) {
+            sum += num;
+            maxNum = Math.max(maxNum, num);
+        }
+        if (sum % 2 != 0) {
+            return false;
+        }
+        int target = sum / 2;
+        if (maxNum > target) {
+            return false;
+        }
+        boolean[] dp = new boolean[target + 1];
+        dp[0] = true;
+        for (int i = 0; i < n; i++) {
+            int num = nums[i];
+            for (int j = target; j >= num; --j) {
+                dp[j] |= dp[j - num];
+            }
+        }
+        return dp[target];
+    }
+}
+```
+
+DFS
+
+```python
+class Solution(object):
+    def canPartition(self, nums):
+        if not nums: return True
+        total = sum(nums)
+        if total & 1:  # 和为奇数
+            return False
+        total = total >> 1  # 除2
+        nums.sort(reverse=True)  # 逆排序
+        if total < nums[0]:  # 当数组最大值超过总和的一半
+            return False
+        return self.dfs(nums, total)
+
+    def dfs(self, nums, total):
+        if total == 0:
+            return True
+        if total < 0:
+            return False
+        for i in range(len(nums)):
+            if self.dfs(nums[i+1:], total - nums[i]):  # 除去i及其之前，保证每个数只用一次
+                return True
+        return False
 ```
 
