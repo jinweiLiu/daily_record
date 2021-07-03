@@ -51,5 +51,19 @@
 
   \cup $\cup$  \bigcup $\bigcup$
 
-  
+- 上划线
+
+   \hat{x}  $\hat{x}$
+
+   \overline{x}  $\overline{x}$
+
+   \widehat{x}  $\widehat{x}$
+
+   \widetilde{x}  $\widetilde{x}$
+
+   \dot{x}  $\dot{x}$
+
+   \ddot{x}  $\ddot{x}$
+
+   
 

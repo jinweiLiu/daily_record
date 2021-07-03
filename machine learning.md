@@ -1260,3 +1260,458 @@ AdaBoost 算法的流程如下图所示：
 
 ### 线性回归
 
+#### 一般性线性回归
+
+​        回归的目的是预测数值型的目标值。最直接的方法是依据输入写出一个目标值的计算公式。假如你想要预测姐姐男友汽车的功率大小，可能会这么计算：
+
+$HorsePower = 0.0015 * annualSalary - 0.99 * hoursListeningToPublicRadio$
+
+​        这就是所谓**回归方程**，其中0.0015和-0.99称作回归系数，求这些回归系数的过程就是回归。一旦有了这些回归系数，再给定输入，做预测就非常容易了。
+
+​        应当怎样从一大堆数据中求出回归方程呢？假定输入数据存放在矩阵X中，而回归系数存放在向量w中。那么对于给定的数据X<sub>1</sub>，预测结果将会通过$Y_1 = X^T_1 w$给出。现在的问题是，手里有一些X和对应的y，怎样才能找到w呢？一个常用的方法就是找出使误差最小的w。这里的误差是指预测y值和真实值之间的差值，使用该误差的简单累加将使得正差值和负差值相互抵消，所以我们采用平方误差。平方误差可以写做：
+$$
+\sum_{i=1}^{m}(y_i-x_i^Tw)^2
+$$
+​        用矩阵表示还可以写做$(y-Xw)^T(y-Xw)$。如果对w求导，得到$X^T(Y-Xw)$，令其等于零，解出w如下：
+$$
+\widetilde{w} = (X^TX)^{-1}X^Ty
+$$
+​        w上方的小标记表示这是当前可以估计出的w的最优解。从现有数据上估计出的w可能并不使数据中的真实w值，所以这里使用一个”帽“符号来表示它仅是w的一个最佳估计
+
+​        值得注意的是，上述公式中包含$X^TX^{-1}$，也就是需要对矩阵求逆，因此这个方程只在逆矩阵存在的时候适用。然而，矩阵的逆可能并不存在，因此必须要在代码中对此作出判断。
+
+​        上述的最佳w求解是统计学中的常见问题，除了矩阵方法外还有很多其他方法可以解决。通过调用NumPy库里的矩阵方法，我们可以仅使用几行代码就完成所需功能。该方法也称作OLS，意思是“普通最小二乘法”（ordinary least squares）。
+
+​        对于下面的数据点分布，介绍如何给出该数据的最佳拟合直线：
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210703165530652.png" alt="image-20210703165530652" style="zoom:67%;" />
+
+```python
+# -*- coding:utf-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        xArr - x数据集
+        yArr - y数据集
+    """
+    numFeat = len(open(fileName).readline().split('\t')) - 1
+    xArr = []; yArr = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        lineArr =[]
+        curLine = line.strip().split('\t')
+        for i in range(numFeat):
+            lineArr.append(float(curLine[i]))
+        xArr.append(lineArr)
+        yArr.append(float(curLine[-1]))
+    return xArr, yArr
+
+def standRegres(xArr,yArr):
+    """
+    函数说明:计算回归系数w
+    Parameters:
+        xArr - x数据集
+        yArr - y数据集
+    Returns:
+        ws - 回归系数
+    """
+    xMat = np.mat(xArr); yMat = np.mat(yArr).T
+    xTx = xMat.T * xMat                            #根据文中推导的公示计算回归系数
+    if np.linalg.det(xTx) == 0.0:
+        print("矩阵为奇异矩阵,不能求逆")
+        return
+    ws = xTx.I * (xMat.T*yMat)
+    return ws
+
+def plotRegression():
+    """
+    函数说明:绘制回归曲线和数据点
+    Parameters:
+        无
+    Returns:
+        无
+    """
+    xArr, yArr = loadDataSet('ex0.txt')                                    #加载数据集
+    ws = standRegres(xArr, yArr)                                        #计算回归系数
+    xMat = np.mat(xArr)                                                    #创建xMat矩阵
+    yMat = np.mat(yArr)                                                    #创建yMat矩阵
+    xCopy = xMat.copy()                                                    #深拷贝xMat矩阵
+    xCopy.sort(0)                                                        #排序
+    yHat = xCopy * ws                                                     #计算对应的y值
+    fig = plt.figure()
+    ax = fig.add_subplot(111)                                            #添加subplot
+    ax.plot(xCopy[:, 1], yHat, c = 'red')                                #绘制回归曲线
+    ax.scatter(xMat[:,1].flatten().A[0], yMat.flatten().A[0], s = 20, c = 'blue',alpha = .5)                #绘制样本点
+    plt.title('DataSet')                                                #绘制title
+    plt.xlabel('X')
+    plt.show()
+
+if __name__ == '__main__':
+    plotRegression()
+```
+
+​        同时，在Python中，Numpy库提供了相关系数的计算方法：可以通过命令corrcoef(yEstimate,yActual)来计算预测值和真实值的相关性。
+
+```python
+xArr, yArr = loadDataSet('ex0.txt')                                    #加载数据集
+ws = standRegres(xArr, yArr)                                        #计算回归系数
+xMat = np.mat(xArr)                                                    #创建xMat矩阵
+yMat = np.mat(yArr)                                                    #创建yMat矩阵
+yHat = xMat * ws
+print(np.corrcoef(yHat.T, yMat))
+```
+
+#### 局部加权线性回归
+
+​        线性回归的一个问题是有可能出现欠拟合现象，因为它求的是具有最小均方误差的无偏估计。显而易见，如果模型欠拟合将不能取得最好的预测效果。所以有些方法允许在估计中引入一些偏差，从而降低预测的均方误差。
+
+​        其中的一个方法是局部加权线性回归（Locally Weighted Linear Regression，LWLR）。在该算法中，我们给待预测点附近的每个点赋予一定的权重；然后与上节类似，在这个子集上基于最小均方差来进行普通的回归。与kNN一样，这种算法每次预测均需要事先选取出对应的数据子集。该算法解出回归系数w的形式如下：
+$$
+\widetilde{w} = (X^TWX)^{-1}X^TWy
+$$
+其中W是一个矩阵，用来给每个数据点赋予权重。
+
+​        LWLR使用"核"（与支持向量机中的核类似）来对附近的点赋予更高的权重。核的类型可以自由选择，最常用的核就是高斯核，高斯核对应的权重如下：
+$$
+w(i,i) = exp(\frac{|x_{(i)}-x|}{-2k^2})
+$$
+这样我们就可以根据上述公式，编写局部加权线性回归，我们通过改变k的值，可以调节回归效果，编写代码如下：
+
+```python
+# -*- coding:utf-8 -*-
+from matplotlib.font_manager import FontProperties
+import matplotlib.pyplot as plt
+import numpy as np
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        xArr - x数据集
+        yArr - y数据集
+    """
+    numFeat = len(open(fileName).readline().split('\t')) - 1
+    xArr = []; yArr = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        lineArr =[]
+        curLine = line.strip().split('\t')
+        for i in range(numFeat):
+            lineArr.append(float(curLine[i]))
+        xArr.append(lineArr)
+        yArr.append(float(curLine[-1]))
+    return xArr, yArr
+
+def plotlwlrRegression():
+    """
+    函数说明:绘制多条局部加权回归曲线
+    Parameters:
+        无
+    Returns:
+        无
+    """
+    font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=14)
+    xArr, yArr = loadDataSet('ex0.txt')                                    #加载数据集
+    yHat_1 = lwlrTest(xArr, xArr, yArr, 1.0)                            #根据局部加权线性回归计算yHat
+    yHat_2 = lwlrTest(xArr, xArr, yArr, 0.01)                            #根据局部加权线性回归计算yHat
+    yHat_3 = lwlrTest(xArr, xArr, yArr, 0.003)                            #根据局部加权线性回归计算yHat
+    xMat = np.mat(xArr)                                                    #创建xMat矩阵
+    yMat = np.mat(yArr)                                                    #创建yMat矩阵
+    srtInd = xMat[:, 1].argsort(0)                                        #排序，返回索引值
+    xSort = xMat[srtInd][:,0,:]
+    fig, axs = plt.subplots(nrows=3, ncols=1,sharex=False, sharey=False, figsize=(10,8))                                        
+    axs[0].plot(xSort[:, 1], yHat_1[srtInd], c = 'red')                        #绘制回归曲线
+    axs[1].plot(xSort[:, 1], yHat_2[srtInd], c = 'red')                        #绘制回归曲线
+    axs[2].plot(xSort[:, 1], yHat_3[srtInd], c = 'red')                        #绘制回归曲线
+    axs[0].scatter(xMat[:,1].flatten().A[0], yMat.flatten().A[0], s = 20, c = 'blue', alpha = .5)                #绘制样本点
+    axs[1].scatter(xMat[:,1].flatten().A[0], yMat.flatten().A[0], s = 20, c = 'blue', alpha = .5)                #绘制样本点
+    axs[2].scatter(xMat[:,1].flatten().A[0], yMat.flatten().A[0], s = 20, c = 'blue', alpha = .5)                #绘制样本点
+    #设置标题,x轴label,y轴label
+    axs0_title_text = axs[0].set_title(u'局部加权回归曲线,k=1.0',FontProperties=font)
+    axs1_title_text = axs[1].set_title(u'局部加权回归曲线,k=0.01',FontProperties=font)
+    axs2_title_text = axs[2].set_title(u'局部加权回归曲线,k=0.003',FontProperties=font)
+    plt.setp(axs0_title_text, size=8, weight='bold', color='red')  
+    plt.setp(axs1_title_text, size=8, weight='bold', color='red')  
+    plt.setp(axs2_title_text, size=8, weight='bold', color='red')  
+    plt.xlabel('X')
+    plt.show()
+def lwlr(testPoint, xArr, yArr, k = 1.0):
+    """
+    函数说明:使用局部加权线性回归计算回归系数w
+    Parameters:
+        testPoint - 测试样本点
+        xArr - x数据集
+        yArr - y数据集
+        k - 高斯核的k,自定义参数
+    Returns:
+        ws - 回归系数
+    """
+    xMat = np.mat(xArr); yMat = np.mat(yArr).T
+    m = np.shape(xMat)[0]
+    weights = np.mat(np.eye((m)))                                        #创建权重对角矩阵
+    for j in range(m):                                                  #遍历数据集计算每个样本的权重
+        diffMat = testPoint - xMat[j, :]                                 
+        weights[j, j] = np.exp(diffMat * diffMat.T/(-2.0 * k**2))
+    xTx = xMat.T * (weights * xMat)                                        
+    if np.linalg.det(xTx) == 0.0:
+        print("矩阵为奇异矩阵,不能求逆")
+        return
+    ws = xTx.I * (xMat.T * (weights * yMat))                            #计算回归系数
+    return testPoint * ws
+def lwlrTest(testArr, xArr, yArr, k=1.0):  
+    """
+    函数说明:局部加权线性回归测试
+    Parameters:
+        testArr - 测试数据集
+        xArr - x数据集
+        yArr - y数据集
+        k - 高斯核的k,自定义参数
+    Returns:
+        ws - 回归系数
+    """
+    m = np.shape(testArr)[0]                                            #计算测试数据集大小
+    yHat = np.zeros(m)    
+    for i in range(m):                                                    #对每个样本点进行预测
+        yHat[i] = lwlr(testArr[i],xArr,yArr,k)
+    return yHat
+if __name__ == '__main__':
+    plotlwlrRegression()
+```
+
+测试结果：
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210703170905124.png" alt="image-20210703170905124" style="zoom:50%;" />
+
+可以看到，当k越小，拟合效果越好。但是当k过小，会出现过拟合的情况，例如k等于0.003的时候。
+
+#### 岭回归
+
+​        岭回归即我们所说的L2正则线性回归，在一般的线性回归最小化均方误差的基础上增加了一个参数w的L2范数的罚项，从而最小化罚项残差平方和：
+$$
+min||Xw - y||_2^2+\lambda||w||_2^2
+$$
+​        简单说来，岭回归就是在普通线性回归的基础上引入单位矩阵。回归系数的计算公式变形如下：
+$$
+\widetilde{w} = (X^TWX + \lambda I)^{-1}X^TWy
+$$
+​        为了使用岭回归和缩减技术，首先需要对特征做标准化处理。因为，我们需要使每个维度特征具有相同的重要性。本文使用的标准化处理比较简单，就是将所有特征都减去各自的均值并除以方差。
+
+​        代码很简单，只需要稍做修改，其中，λ为模型的参数。我们先绘制一个回归系数与log(λ)的曲线图，看下它们的规律，编写代码如下：
+
+```python
+# -*-coding:utf-8 -*-
+from matplotlib.font_manager import FontProperties
+import matplotlib.pyplot as plt
+import numpy as np
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        xArr - x数据集
+        yArr - y数据集
+    """
+    numFeat = len(open(fileName).readline().split('\t')) - 1
+    xArr = []; yArr = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        lineArr =[]
+        curLine = line.strip().split('\t')
+        for i in range(numFeat):
+            lineArr.append(float(curLine[i]))
+        xArr.append(lineArr)
+        yArr.append(float(curLine[-1]))
+    return xArr, yArr
+def ridgeRegres(xMat, yMat, lam = 0.2):
+    """
+    函数说明:岭回归
+    Parameters:
+        xMat - x数据集
+        yMat - y数据集
+        lam - 缩减系数
+    Returns:
+        ws - 回归系数
+    """
+    xTx = xMat.T * xMat
+    denom = xTx + np.eye(np.shape(xMat)[1]) * lam
+    if np.linalg.det(denom) == 0.0:
+        print("矩阵为奇异矩阵,不能转置")
+        return
+    ws = denom.I * (xMat.T * yMat)
+    return ws
+def ridgeTest(xArr, yArr):
+    """
+    函数说明:岭回归测试
+    Parameters:
+        xMat - x数据集
+        yMat - y数据集
+    Returns:
+        wMat - 回归系数矩阵
+    """
+    xMat = np.mat(xArr); yMat = np.mat(yArr).T
+    #数据标准化
+    yMean = np.mean(yMat, axis = 0)                        #行与行操作，求均值
+    yMat = yMat - yMean                                    #数据减去均值
+    xMeans = np.mean(xMat, axis = 0)                    #行与行操作，求均值
+    xVar = np.var(xMat, axis = 0)                        #行与行操作，求方差
+    xMat = (xMat - xMeans) / xVar                        #数据减去均值除以方差实现标准化
+    numTestPts = 30                                        #30个不同的lambda测试
+    wMat = np.zeros((numTestPts, np.shape(xMat)[1]))    #初始回归系数矩阵
+    for i in range(numTestPts):                            #改变lambda计算回归系数
+        ws = ridgeRegres(xMat, yMat, np.exp(i - 10))    #lambda以e的指数变化，最初是一个非常小的数，
+        wMat[i, :] = ws.T                                 #计算回归系数矩阵
+    return wMat
+def plotwMat():
+    """
+    函数说明:绘制岭回归系数矩阵
+    """
+    font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=14)
+    abX, abY = loadDataSet('abalone.txt')
+    redgeWeights = ridgeTest(abX, abY)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(redgeWeights)    
+    ax_title_text = ax.set_title(u'log(lambada)与回归系数的关系', FontProperties = font)
+    ax_xlabel_text = ax.set_xlabel(u'log(lambada)', FontProperties = font)
+    ax_ylabel_text = ax.set_ylabel(u'回归系数', FontProperties = font)
+    plt.setp(ax_title_text, size = 20, weight = 'bold', color = 'red')
+    plt.setp(ax_xlabel_text, size = 10, weight = 'bold', color = 'black')
+    plt.setp(ax_ylabel_text, size = 10, weight = 'bold', color = 'black')
+    plt.show()
+if __name__ == '__main__':
+    plotwMat()
+```
+
+测试结果：
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210703171636563.png" alt="image-20210703171636563" style="zoom:67%;" />
+
+​        上图绘制了回归系数与log(λ)的关系。在最左边，即λ最小时，可以得到所有系数的原始值（与线性回归一致）；而在右边，系数全部缩减成0；在中间部分的某个位置，将会得到最好的预测结果。想要得到最佳的λ参数，可以使用交叉验证的方式获得。
+
+#### 前向逐步线性回归
+
+​        前向逐步线性回归算法属于一种贪心算法，即每一步都尽可能减少误差。我们计算回归系数，不再是通过公式计算，而是通过每次微调各个回归系数，然后计算预测误差。那个使误差最小的一组回归系数，就是我们需要的最佳回归系数。
+
+​        前向逐步线性回归实现也很简单。当然，还是先进行数据标准化，编写代码如下：
+
+```python
+# -*-coding:utf-8 -*-
+from matplotlib.font_manager import FontProperties
+import matplotlib.pyplot as plt
+import numpy as np
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        xArr - x数据集
+        yArr - y数据集
+    """
+    numFeat = len(open(fileName).readline().split('\t')) - 1
+    xArr = []; yArr = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        lineArr =[]
+        curLine = line.strip().split('\t')
+        for i in range(numFeat):
+            lineArr.append(float(curLine[i]))
+        xArr.append(lineArr)
+        yArr.append(float(curLine[-1]))
+    return xArr, yArr
+ 
+def regularize(xMat, yMat):
+    """
+    函数说明:数据标准化
+    Parameters:
+        xMat - x数据集
+        yMat - y数据集
+    Returns:
+        inxMat - 标准化后的x数据集
+        inyMat - 标准化后的y数据集
+    """    
+    inxMat = xMat.copy()                                    #数据拷贝
+    inyMat = yMat.copy()
+    yMean = np.mean(yMat, 0)                                 #行与行操作，求均值
+    inyMat = yMat - yMean                                    #数据减去均值
+    inMeans = np.mean(inxMat, 0)                             #行与行操作，求均值
+    inVar = np.var(inxMat, 0)                                #行与行操作，求方差
+    inxMat = (inxMat - inMeans) / inVar                      #数据减去均值除以方差实现标准化
+    return inxMat, inyMat
+ 
+def rssError(yArr,yHatArr):
+    """
+    函数说明:计算平方误差
+    Parameters:
+        yArr - 预测值
+        yHatArr - 真实值
+    Returns:
+    """
+    return ((yArr-yHatArr)**2).sum()
+def stageWise(xArr, yArr, eps = 0.01, numIt = 100):
+    """
+    函数说明:前向逐步线性回归
+    Parameters:
+        xArr - x输入数据
+        yArr - y预测数据
+        eps - 每次迭代需要调整的步长
+        numIt - 迭代次数
+    Returns:
+        returnMat - numIt次迭代的回归系数矩阵
+    """
+    xMat = np.mat(xArr); yMat = np.mat(yArr).T              #数据集
+    xMat, yMat = regularize(xMat, yMat)                        #数据标准化
+    m, n = np.shape(xMat)
+    returnMat = np.zeros((numIt, n))                            #初始化numIt次迭代的回归系数矩阵
+    ws = np.zeros((n, 1))                                        #初始化回归系数矩阵
+    wsTest = ws.copy()
+    wsMax = ws.copy()
+    for i in range(numIt):                                       #迭代numIt次
+        # print(ws.T)                                               #打印当前回归系数矩阵
+        lowestError = float('inf');                                  #正无穷
+        for j in range(n):                                           #遍历每个特征的回归系数
+            for sign in [-1, 1]:
+                wsTest = ws.copy()
+                wsTest[j] += eps * sign                      #微调回归系数
+                yTest = xMat * wsTest                        #计算预测值
+                rssE = rssError(yMat.A, yTest.A)             #计算平方误差
+                if rssE < lowestError:                       #如果误差更小，则更新当前的最佳回归系数
+                    lowestError = rssE
+                    wsMax = wsTest
+        ws = wsMax.copy()
+        returnMat[i,:] = ws.T                                 #记录numIt次迭代的回归系数矩阵
+    return returnMat
+def plotstageWiseMat():
+    """
+    函数说明:绘制岭回归系数矩阵
+    """
+    font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=14)
+    xArr, yArr = loadDataSet('abalone.txt')
+    returnMat = stageWise(xArr, yArr, 0.005, 1000)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(returnMat)    
+    ax_title_text = ax.set_title(u'前向逐步回归:迭代次数与回归系数的关系', FontProperties = font)
+    ax_xlabel_text = ax.set_xlabel(u'迭代次数', FontProperties = font)
+    ax_ylabel_text = ax.set_ylabel(u'回归系数', FontProperties = font)
+    plt.setp(ax_title_text, size = 15, weight = 'bold', color = 'red')
+    plt.setp(ax_xlabel_text, size = 10, weight = 'bold', color = 'black')
+    plt.setp(ax_ylabel_text, size = 10, weight = 'bold', color = 'black')
+    plt.show()
+if __name__ == '__main__':
+    plotstageWiseMat()
+```
+
+测试结果：
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210703172047898.png" alt="image-20210703172047898" style="zoom:67%;" />
+
+​        上图是迭代次数与回归系数的关系曲线。可以看到，有些系数从始至终都是约为0的，这说明它们不对目标造成任何影响，也就是说这些特征很可能是不需要的。逐步线性回归算法的优点在于它可以帮助人们理解有的模型并做出改进。当构建了一个模型后，可以运行该算法找出重要的特征，这样就有可能及时停止对那些不重要特征的收集。
