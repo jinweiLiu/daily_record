@@ -1715,3 +1715,26 @@ if __name__ == '__main__':
 <img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210703172047898.png" alt="image-20210703172047898" style="zoom:67%;" />
 
 ​        上图是迭代次数与回归系数的关系曲线。可以看到，有些系数从始至终都是约为0的，这说明它们不对目标造成任何影响，也就是说这些特征很可能是不需要的。逐步线性回归算法的优点在于它可以帮助人们理解有的模型并做出改进。当构建了一个模型后，可以运行该算法找出重要的特征，这样就有可能及时停止对那些不重要特征的收集。
+
+#### Sklearn的linear_model
+
+sklearn.linear_model提供了很多线性模型，包括岭回归、贝叶斯回归、Lasso等。本文主要讲解岭回归Ridge。
+
+![image-20210703172618033](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210703172618033.png)
+
+参数说明如下：
+
+- alpha：正则化系数，float类型，默认为1.0。正则化改善了问题的条件并减少了估计的方差。较大的值指定较强的正则化。
+- fit_intercept：是否需要截距，bool类型，默认为True。也就是是否求解b。
+- normalize：是否先进行归一化，bool类型，默认为False。如果为真，则回归X将在回归之前被归一化。 当fit_intercept设置为False时，将忽略此参数。 当回归量归一化时，注意到这使得超参数学习更加鲁棒，并且几乎不依赖于样本的数量。 相同的属性对标准化数据无效。然而，如果你想标准化，请在调用normalize = False训练估计器之前，使用preprocessing.StandardScaler处理数据。
+- copy_X：是否复制X数组，bool类型，默认为True，如果为True，将复制X数组; 否则，它覆盖原数组X。
+- max_iter：最大的迭代次数，int类型，默认为None，最大的迭代次数，对于sparse_cg和lsqr而言，默认次数取决于scipy.sparse.linalg，对于sag而言，则默认为1000次。
+- tol：精度，float类型，默认为0.001。就是解的精度。
+- solver：求解方法，str类型，默认为auto。可选参数为：auto、svd、cholesky、lsqr、sparse_cg、sag。
+  - auto根据数据类型自动选择求解器。
+  - svd使用X的奇异值分解来计算Ridge系数。对于奇异矩阵比cholesky更稳定。
+  - cholesky使用标准的scipy.linalg.solve函数来获得闭合形式的解。
+  - sparse_cg使用在scipy.sparse.linalg.cg中找到的共轭梯度求解器。作为迭代算法，这个求解器比大规模数据（设置tol和max_iter的可能性）的cholesky更合适。
+  - lsqr使用专用的正则化最小二乘常数scipy.sparse.linalg.lsqr。它是最快的，但可能在旧的scipy版本不可用。它是使用迭代过程。
+  - sag使用随机平均梯度下降。它也使用迭代过程，并且当n_samples和n_feature都很大时，通常比其他求解器更快。注意，sag快速收敛仅在具有近似相同尺度的特征上被保证。您可以使用sklearn.preprocessing的缩放器预处理数据。
+- random_state：sag的伪随机种子。
