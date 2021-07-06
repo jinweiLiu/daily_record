@@ -72,6 +72,67 @@
   ssh -L 8097:127.0.0.1:8097 dell@202.120.92.171
   ```
 
+### PyTorch
+
+- tensor to numpy
+
+  ```python
+  a = torch.ones(5)
+  
+  b = a.numpy()
+  ```
+
+- numpy to tensor
+
+  ```python
+  a = numpy.ones(5)
+  
+  b = torch.from_numpy(a)
+  ```
+
+- item()
+
+  item()函数可以理解为得到 **数值**，就是纯粹的一个值。
+
+  ```python
+  x = torch.randn(1)
+  print(x)
+  print(x.item())
+  
+  # tensor([-0.2368])
+  # -0.23680149018764496
+  ```
+
+#### 数据类型转换
+
+Pytorch中的Tensor常用的类型转换函数（inplace操作）：
+
+（1）数据类型转换
+
+　　在Tensor后加 .long(), .int(), .float(), .double()等即可，也可以用.to()函数进行转换，所有的Tensor类型可参考https://pytorch.org/docs/stable/tensors.html
+
+（2）数据存储位置转换
+
+　　CPU张量 ----> GPU张量，使用data.cuda()
+
+　　GPU张量 ----> CPU张量，使用data.cpu()
+
+（3）与numpy数据类型转换
+
+　　Tensor---->Numpy 使用 data.numpy()，data为Tensor变量
+
+　　Numpy ----> Tensor 使用 torch.from_numpy(data)，data为numpy变量
+
+（4）与Python数据类型转换
+
+　　Tensor ----> 单个Python数据，使用data.item()，data为Tensor变量且只能为包含单个数据
+
+　　Tensor ----> Python list，使用data.tolist()，data为Tensor变量，返回shape相同的可嵌套的list
+
+（5）剥离出一个tensor参与计算，但不参与求导
+
+　　Tensor后加 .detach()
+
 ### 代码相关
 
 ```python

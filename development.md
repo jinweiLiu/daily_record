@@ -111,6 +111,8 @@
   
   git reset -- hard #直接覆盖
   git pull
+  
+  git checkout . #放弃当前所有本地修改
   ```
 
 - 设置忽略文件
