@@ -133,6 +133,16 @@ Pytorch中的Tensor常用的类型转换函数（inplace操作）：
 
 　　Tensor后加 .detach()
 
+#### 冻结参数
+
+如果整个过程完全不动这部分的参数，直接设置optimizer的时候只声明要被训练的参数就行，比如：
+
+假设你的模型里有4个层（nn.Module），那么在设置优化器时，这样写：
+
+```
+opt = SGD([{'params':model[0].parameters()}],lr=0.1)
+```
+
 ### 代码相关
 
 ```python
@@ -166,6 +176,12 @@ torch.cuda.is_available()
 （1）奇数卷积核更容易做padding。我们假设卷积核大小为k*k，为了让卷积后的图像大小与原图一样大，根据公式可得到padding = (k-1)/2。这里的k只有在取奇数的时候，padding才能使整数，否则padding不好进行图片填充。
 
 （2）更容易找到锚点。在CNN中，一般以卷积核的某个基准点进行窗口滑动，通常这个基准点是卷积核的中心点，所以如果k是偶数，就找不到中心点。
+
+### 分类问题
+
+#### BCELoss,BCEWithLogitsLoss和CrossEntropyLoss
+
+#### BatchNorm2d
 
 ### yolov3
 
