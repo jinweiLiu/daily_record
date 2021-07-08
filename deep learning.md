@@ -143,6 +143,45 @@ Pytorch中的Tensor常用的类型转换函数（inplace操作）：
 opt = SGD([{'params':model[0].parameters()}],lr=0.1)
 ```
 
+#### Dataset
+
+torch.utils.data.Dataset是一个抽象类，用户想要加载自定义的数据只需要继承这个类，并且重写其中的两个方法即可：
+
+- \__len__：实现 len(dataset) 返回整个数据集的大小
+- \__getitem__：用来获取一些索引的数据，是 dataset[i] 返回数据集中第i个样本
+
+```python
+    def __getitem__(self, index):
+        raise NotImplementedError
+
+    def __len__(self):
+        raise NotImplementedError
+```
+
+#### DataLoader
+
+```python
+torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, sampler=None, \
+    batch_sampler=None, num_workers=0, collate_fn=None, pin_memory=False, \
+    drop_last=False, timeout=0, worker_init_fn=None, multiprocessing_context=None)
+```
+
+dataset：定义的dataset类返回的结果
+
+batch_size：每个batch要加载的样本数，默认为1。
+
+shuffle：在每个epoch中对整个数据集data进行shuffle重排，默认为False。
+
+sample：定义从数据集中加载数据所采用的策略，如果指定的话，shuffle必须为False；batch_sample类似，表示一次返回一个batch的index。
+
+num_workers：表示开启多少个线程数取加载你的数据，默认为0，代表只使用主线程。
+
+collate_fn：表示合并样本列表以形成小批量的Tensor对象。默认的collate_fn函数是要求一个batch中的图片都具有相同size（因为要做stack操作），当一个batch中的图片大小都不同时，可以使用自定义的collate_fn函数，则一个batch中的图片不再被stack操作，**可以全部存储在一个list中**，当然还有对应的label。
+
+pin_memory：表示要将load进来的数据是否要拷贝到pin_memory区中，其表示生成的Tensor数据是属于内存中的锁内存区，这样将Tensor数据转义到GPU中速度就会快一些，默认为False。
+
+drop_last：当你的整个数据长度不能够整除你的batch_size，选择是否要丢弃最后一个不完整的batch，默认为False。
+
 ### 代码相关
 
 ```python
