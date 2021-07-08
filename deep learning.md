@@ -222,6 +222,26 @@ torch.cuda.is_available()
 
 #### BatchNorm2d
 
+批归一化：每一次优化时的样本数目，通常BN网络层用在卷积层后，用于重新调整数据分布
+
+好处：(1) 减轻了对参数初始化的依赖，有利地解决了梯度爆炸或消失问题。
+
+​            (2) 训练更快，可以使用更高的学习率。
+
+​            (3) BN一定程度上增加了泛化能力，dropout等技术可以去掉。
+
+![image-20210708211623023](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210708211623023.png)
+
+$E(x)$和$Var(x)$为批量数据的均值和方差，$\epsilon$为了防止分母为0，对应参数eps
+
+- num_features：一般输入参数为(N,C,H,W)，即为其中特征的数量
+
+- eps：分母中添加的一个值，目的是为了计算的稳定性，默认为：1e-5
+
+- momentum：一个用于运行过程中均值和方差的一个估计参数，默认为：0.1
+
+- affine：当设为true时，会给定可以学习的系数矩阵gamma和beta
+
 ### yolov3
 
 #### yolov3.cfg文件说明
