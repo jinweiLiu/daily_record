@@ -128,7 +128,7 @@ class Solution {
 
 ### 哈希表
 
-#### 1711、大餐计数
+#### 17.11、大餐计数
 
 大餐 是指 恰好包含两道不同餐品 的一餐，其美味程度之和等于 2 的幂。
 
@@ -177,6 +177,54 @@ class Solution {
        return pairs;
     }
 }
+```
+
+### 摩尔投票
+
+#### 17.10、主要元素
+
+数组中占比超过一半的元素称之为主要元素。给你一个 整数 数组，找出其中的主要元素。若没有，返回 -1 。请设计时间复杂度为 O(N) 、空间复杂度为 O(1) 的解决方案。
+
+示例 1：
+
+```
+输入：[1,2,5,9,5,9,5,5,5]
+输出：5
+```
+
+示例 2：
+
+```
+输入：[3,2]
+输出：-1
+```
+
+**解题思路**：
+
+一次遍历，cur为上一步的数，count表示cur的数量，当前数如果和cur相同则count++，否则count--。当count为0时，替换cur。遍历结束后，再遍历一次，统计最终cur的数量是否大于数组长度的一半。
+
+**题解代码**：
+
+```python
+class Solution:
+    def majorityElement(self, nums: List[int]) -> int:
+        length = len(nums)
+        count = 1
+        cur = nums[0]
+        for i in range(1,length):
+            if count == 0:
+                cur = nums[i]
+                count = 1
+                continue
+            if nums[i] != cur:
+                count -= 1
+            else:
+                count += 1
+        acc = 0
+        for num in nums:
+            if num == cur:
+                acc += 1
+        return cur if acc * 2 >length else -1
 ```
 
 ### 动态规划
@@ -1725,3 +1773,4 @@ class Solution {
 }
 ```
 
+#### 
