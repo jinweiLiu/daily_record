@@ -1818,4 +1818,120 @@ class Solution {
 }
 ```
 
-#### 
+#### 139、单词拆分
+
+给定一个非空字符串 s 和一个包含非空单词的列表 wordDict，判定 s 是否可以被空格拆分为一个或多个在字典中出现的单词。
+
+说明：
+
+拆分时可以重复使用字典中的单词。
+你可以假设字典中没有重复的单词。
+示例 1：
+
+```
+输入: s = "leetcode", wordDict = ["leet", "code"]
+输出: true
+解释: 返回 true 因为 "leetcode" 可以被拆分成 "leet code"。
+```
+
+**解题思路**：
+
+- 回溯
+
+使用记忆化函数，保存出现过的 backtrack(s)，避免重复计算。
+
+定义回溯函数 backtrack(s)
+
+​        若 s 长度为 0，则返回 True，表示已经使用 wordDict 中的单词分割完。
+
+​        初试化当前字符串是否可以被分割 res=False
+
+​        遍历结束索引 i，遍历区间 [1,n+1)：
+
+​                若 s[0,⋯,i−1] 在 wordDict 中：res=backtrack(s[i,⋯,n−1]) or res。解释：保存遍历结束索引中，可以使字符串切割完成的情况。
+
+​        返回 res
+
+返回 backtrack(s)
+
+- 动态规划
+
+单词就是物品，字符串s就是背包，单词能否组成字符串s，就是问物品能不能把背包装满。
+
+拆分时可以重复使用字典中的单词，说明就是一个完全背包！
+
+动规五部曲分析如下：
+
+1. 确定dp数组以及下标的含义
+
+**dp[i] : 字符串长度为i的话，dp[i]为true，表示可以拆分为一个或多个在字典中出现的单词**。
+
+2. 确定递推公式
+
+如果确定dp[j] 是true，且 [j, i] 这个区间的子串出现在字典里，那么dp[i]一定是true。（j < i ）。
+
+所以递推公式是 if([j, i] 这个区间的子串出现在字典里 && dp[j]是true) 那么 dp[i] = true。
+
+3. dp数组如何初始化
+
+从递归公式中可以看出，dp[i] 的状态依靠 dp[j]是否为true，那么dp[0]就是递归的根基，dp[0]一定要为true，否则递归下去后面都都是false了。
+
+那么dp[0]有没有意义呢？
+
+dp[0]表示如果字符串为空的话，说明出现在字典里。
+
+但题目中说了“给定一个非空字符串 s” 所以测试数据中不会出现i为0的情况，那么dp[0]初始为true完全就是为了推导公式。
+
+下标非0的dp[i]初始化为false，只要没有被覆盖说明都是不可拆分为一个或多个在字典中出现的单词。
+
+**题解代码**：
+
+```java
+//动态规划
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        boolean[] valid = new boolean[s.length() + 1];
+        valid[0] = true;
+        for(int i = 1; i <= s.length(); ++i){
+            for(int j = 0; j < i; ++j){
+                if(wordDict.contains(s.substring(j,i)) && valid[j]){
+                    valid[i] = true;
+                }
+            }
+        }
+        return valid[s.length()];
+    }
+}
+```
+
+```java
+//记忆化回溯
+class Solution {
+    Set<String> memory = new HashSet<>();
+    public boolean wordBreak(String s, List<String> wordDict) {
+        Set<String> set = new HashSet<>();
+        for(String str : wordDict){
+            set.add(str);
+        }
+        return DFS(s,set);
+    }
+    public boolean DFS(String s,Set<String> set){
+        if(s.length()==0) return true;
+        if(memory.contains(s)) return false;//如果记忆中存在此字符串，返回false，结束递归。
+        StringBuilder strb = new StringBuilder();
+        for(int i=0;i<s.length();i++){
+            strb.append(s.charAt(i));
+            if(set.contains(strb.toString()) && !memory.contains(s.substring(i+1))){
+                if(DFS(s.substring(i+1),set)){
+                    return true;
+                }else{
+                    memory.add(s.substring(i+1));//对子串失败的情况进行记忆
+                }
+            }
+        }
+        memory.add(s);//对s失败的情况进行记忆
+        return false;
+    }
+}
+```
+
