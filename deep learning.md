@@ -218,7 +218,124 @@ torch.cuda.is_available()
 
 ### 分类问题
 
-#### BCELoss,BCEWithLogitsLoss和CrossEntropyLoss
+| 分类问题名称 | 输出层使用激活函数 | 对应损失函数         |
+| ------------ | ------------------ | -------------------- |
+| 二分类       | sigmoid函数        | 二分类交叉熵损失函数 |
+| 多分类       | softmax函数        | 多类别交叉熵损失函数 |
+| 多标签分类   | sigmoid函数        | 二分类交叉熵损失函数 |
+
+#### CrossEntropyLoss
+
+CrossEntropyLoss函数包含Softmax层、log和NLLLoss层，适用于**单标签**任务，主要用在单标签多分类任务上，当然也可以用在单标签二分类上。
+
+Pytorch中计算的交叉熵并不是采用：
+$$
+H(p,q) = -\sum_x(p(x)logq(x)+(1-p(x))log(1-q(x)))
+$$
+这种方式计算得到的，而是交叉熵的另外一种方式计算得到的：
+$$
+H(p,q)=-\sum p(x)logq(x)
+$$
+它是交叉熵的另外一种方式。
+
+Pytorch中CrossEntropyLoss()函数的主要是将softmax-log-NLLLoss合并到一块得到的结果。
+
+    1、Softmax后的数值都在0~1之间，所以ln之后值域是负无穷到0。
+
+    2、然后将Softmax之后的结果取log，将乘法改成加法减少计算量，同时保障函数的单调性 。
+
+    3、NLLLoss的结果就是把上面的输出与Label对应的那个值拿出来，去掉负号，再求均值。
+
+```python
+import torch
+import torch.nn as nn
+x_input=torch.randn(3,3)#随机生成输入 
+print('x_input:\n',x_input) 
+y_target=torch.tensor([1,2,0])#设置输出具体值 print('y_target\n',y_target)
+
+#计算输入softmax，此时可以看到每一行加到一起结果都是1
+softmax_func=nn.Softmax(dim=1)
+soft_output=softmax_func(x_input)
+print('soft_output:\n',soft_output)
+
+#在softmax的基础上取log
+log_output=torch.log(soft_output)
+print('log_output:\n',log_output)
+
+#对比softmax与log的结合与nn.LogSoftmaxloss(负对数似然损失)的输出结果，发现两者是一致的。
+logsoftmax_func=nn.LogSoftmax(dim=1)
+logsoftmax_output=logsoftmax_func(x_input)
+print('logsoftmax_output:\n',logsoftmax_output)
+
+#pytorch中关于NLLLoss的默认参数配置为：reducetion=True、size_average=True
+nllloss_func=nn.NLLLoss()
+nlloss_output=nllloss_func(logsoftmax_output,y_target)
+print('nlloss_output:\n',nlloss_output)
+
+#直接使用pytorch中的loss_func=nn.CrossEntropyLoss()看与经过NLLLoss的计算是不是一样
+crossentropyloss=nn.CrossEntropyLoss()
+crossentropyloss_output=crossentropyloss(x_input,y_target)
+print('crossentropyloss_output:\n',crossentropyloss_output)
+```
+
+最后计算得到的结果：
+
+```text
+x_input:
+ tensor([[ 2.8883,  0.1760,  1.0774],
+        [ 1.1216, -0.0562,  0.0660],
+        [-1.3939, -0.0967,  0.5853]])
+y_target
+ tensor([1, 2, 0])
+soft_output:
+ tensor([[0.8131, 0.0540, 0.1329],
+        [0.6039, 0.1860, 0.2102],
+        [0.0841, 0.3076, 0.6083]])
+log_output:
+ tensor([[-0.2069, -2.9192, -2.0178],
+        [-0.5044, -1.6822, -1.5599],
+        [-2.4762, -1.1790, -0.4970]])
+logsoftmax_output:
+ tensor([[-0.2069, -2.9192, -2.0178],
+        [-0.5044, -1.6822, -1.5599],
+        [-2.4762, -1.1790, -0.4970]])
+nlloss_output:
+ tensor(2.3185)
+crossentropyloss_output:
+ tensor(2.3185)
+```
+
+#### BCELoss 
+
+BCELoss可以看作是CrossEntropyLoss的一个特例，适用于**二分类**任务，可以是单标签二分类，也可以是多标签二分类任务。
+
+BCELoss的计算公式为：
+$$
+-\frac{1}{n}\sum(y_nlnx_n+(1-y_n)ln(1-x_n))
+$$
+
+#### BCEWithLogistsLoss
+
+BCEWithLogitsLoss函数包括了Sigmoid层和BCELoss层，适用于**二分类**任务，可以是单标签二分类，也可以是多标签二分类任务。
+
+```python
+label = torch.Tensor([1, 1, 0])
+pred = torch.Tensor([3, 2, 1])
+pred_sig = torch.sigmoid(pred)
+# BCELoss must be used together with sigmoid
+loss = nn.BCELoss()
+print(loss(pred_sig, label))
+# BCEWithLogitsLoss
+loss = nn.BCEWithLogitsLoss()
+print(loss(pred, label))
+```
+
+输出结果：
+
+```text
+tensor(0.4963)  # BCELoss
+tensor(0.4963)  # BCEWithLogiticsLoss
+```
 
 #### BatchNorm2d
 
