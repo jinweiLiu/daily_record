@@ -72,6 +72,29 @@
   ssh -L 8097:127.0.0.1:8097 dell@202.120.92.171
   ```
 
+### 数学知识
+
+#### Sigmoid函数
+
+$$
+\sigma(z)=\frac{1}{1+e^{-z}}
+$$
+
+图像：
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210710160010776.png" alt="image-20210710160010776" style="zoom:67%;" />
+
+求导：
+$$
+\sigma^{'}(z)=\frac{1}{1+e^{-z}} - \frac{1}{(1+e^{-z})^2}=\sigma(z)(1-\sigma(z))
+$$
+
+#### Softmax函数
+
+$$
+softmax(x)_i = \frac{exp(x_i)}{\sum_jexp(x_j)}
+$$
+
 ### PyTorch
 
 - tensor to numpy
