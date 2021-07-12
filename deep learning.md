@@ -783,3 +783,23 @@ if __name__ == "__main__":
     kmeans.txt2clusters()
 ```
 
+### SSD
+
+网络结构
+
+![image-20210712212429956](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210712212429956.png)
+
+![image-20210712212429956](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\20190427212254620.png)
+
+算法步骤：
+
+1、输入一幅图片（300x300），将其输入到预训练好的分类网络中来获得不同大小的特征映射，修改了传统的VGG16网络；
+
+- 将VGG16的FC6和FC7层转化为卷积层，如图1上的Conv6和Conv7；
+- 去掉所有的Dropout层和FC8层；
+- 添加了Atrous算法（hole算法）；
+- 将Pool5从2x2-S2变换到3x3-S1；
+
+2、抽取Conv4_3、Conv7、Conv8_2、Conv9_2、Conv10_2、Conv11_2层的feature map，然后分别在这些feature map层上面的每一个点构造6个不同尺度大小的bbox，然后分别进行检测和分类，生成多个bbox，如图2所示；
+
+3、将不同feature map获得的bbox结合起来，经过NMS（非极大值抑制）方法来抑制掉一部分重叠或者不正确的bbox，生成最终的bbox集合（即检测结果）；
