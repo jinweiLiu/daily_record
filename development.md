@@ -309,6 +309,30 @@ sc.exe delete "YourServiceName"
 
   > alter table table_name add index index_name (column_list)
 
+- 数据库索引结构
+
+  MySQL采用B+ tree的数据结构构建索引
+
+  - B tree
+
+    <img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210712164806070.png" alt="image-20210712164806070" style="zoom:80%;" />
+
+    B tree称为平衡多路搜索树，它基于在二叉树的基础上采用多叉树，再使用平衡二叉树的思想。
+
+    1. 所有键值分布在整颗树中；
+    2. 任何一个关键字出现且只出现在一个结点中；
+    3. 搜索有可能在非叶子结点结束；
+    4. 在关键字全集内做一次查找,性能逼近二分查找
+
+  - B+ tree
+
+    <img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210712164923359.png" alt="image-20210712164923359" style="zoom:80%;" />
+
+    B+树是B-树的变体，也是一种多路搜索树, 它与 B- 树的不同之处在于:
+
+    1. 所有关键字存储在叶子节点出现,内部节点(非叶子节点并不存储真正的 data)
+    2. 为所有叶子结点增加了一个链指针（对于范围查询有利）
+
 - 索引分析
 
   explain用来分析SQL语句的查询情况，它包含id、select_type、table、type、possible_keys、key、key_len、ref、rows、extra字段
