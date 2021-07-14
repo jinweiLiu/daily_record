@@ -65,5 +65,7 @@
 
    \ddot{x}  $\ddot{x}$
 
-   
+- 乘号
+
+   \times $\times$
 
