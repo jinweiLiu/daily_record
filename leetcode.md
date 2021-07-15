@@ -227,6 +227,129 @@ class Solution:
         return cur if acc * 2 >length else -1
 ```
 
+### 二分查找
+
+#### 1818、绝对差值和
+
+给你两个正整数数组 nums1 和 nums2 ，数组的长度都是 n 。
+
+数组 nums1 和 nums2 的 绝对差值和 定义为所有 |nums1[i] - nums2[i]|（0 <= i < n）的 总和（下标从 0 开始）。
+
+你可以选用 nums1 中的 任意一个 元素来替换 nums1 中的 至多 一个元素，以 最小化 绝对差值和。
+
+在替换数组 nums1 中最多一个元素 之后 ，返回最小绝对差值和。因为答案可能很大，所以需要对 109 + 7 取余 后返回。
+
+|x| 定义为：
+
+如果 x >= 0 ，值为 x ，或者
+如果 x <= 0 ，值为 -x
+
+示例 1：
+
+```
+输入：nums1 = [1,7,5], nums2 = [2,3,5]
+输出：3
+解释：有两种可能的最优方案：
+将第二个元素替换为第一个元素：[1,7,5] => [1,1,5] ，或者
+将第二个元素替换为第三个元素：[1,7,5] => [1,5,5]
+两种方案的绝对差值和都是 |1-2| + (|1-3| 或者 |5-3|) + |5-5| = 3
+```
+
+示例 2：
+
+```
+输入：nums1 = [2,4,6,8,10], nums2 = [2,4,6,8,10]
+输出：0
+解释：nums1 和 nums2 相等，所以不用替换元素。绝对差值和为 0
+```
+
+**解题思路**：
+
+错误思路（找到最大差值，减小最小差值）
+
+```java
+/*
+最后执行的输入：
+[1,28,21]
+[9,21,20]
+*/
+class Solution {
+    public int minAbsoluteSumDiff(int[] nums1, int[] nums2) {
+        int n = nums1.length;
+        int idx = 0;
+        int count = 0;
+        int max = 0;
+        for(int i = 0; i < n; ++i){
+            if(Math.abs(nums1[i] - nums2[i]) > max){
+                idx = i;
+                max = Math.abs(nums1[i] - nums2[i]);
+            }
+            count += Math.abs(nums1[i] - nums2[i]);
+        }
+        if(count == 0) return 0;
+        int min = max;
+        for(int i = 0; i < n; ++i){
+            if(i == idx) continue;
+            min = Math.min(Math.abs(nums1[i] - nums2[idx]),min);
+        }
+        return (count - max + min) % 1000000007;
+    }
+}
+```
+
+正确思路
+
+排序+二分查找，最大化以下差值
+$$
+|nums_1[i] - nums_2[i]| - |nums_1[j]-nums_2[i|
+$$
+我们希望能最大化该差值，这样可以使得答案尽可能小。因为我们只能修改一个位置，所以我们需要检查每一个 i 对应的差值的最大值。当 i 确定时，该式的前半部分的值即可确定，而后半部分的值取决于 j 的选择。观察该式，我们只需要找到和 $\textit{nums}_2[i]$尽可能接近的$\textit{nums}_1[j]$ 即可。
+
+**题解代码**：
+
+```java
+class Solution {
+    public int minAbsoluteSumDiff(int[] nums1, int[] nums2) {
+        final int MOD = 1000000007;
+        int n = nums1.length;
+        int[] rec = new int[n];
+        System.arraycopy(nums1, 0, rec, 0, n);
+        Arrays.sort(rec);
+        int sum = 0, maxn = 0;
+        for (int i = 0; i < n; i++) {
+            int diff = Math.abs(nums1[i] - nums2[i]);
+            sum = (sum + diff) % MOD;
+            int j = binarySearch(rec, nums2[i]);
+            if (j < n) {
+                maxn = Math.max(maxn, diff - (rec[j] - nums2[i]));
+            }
+            if (j > 0) {
+                maxn = Math.max(maxn, diff - (nums2[i] - rec[j - 1]));
+            }
+        }
+        return (sum - maxn + MOD) % MOD;
+    }
+
+    public int binarySearch(int[] rec, int target) {
+        int low = 0, high = rec.length - 1;
+        if (rec[high] < target) {
+            return high + 1;
+        }
+        while (low < high) {
+            int mid = (high - low) / 2 + low;
+            if (rec[mid] < target) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+        return low;
+    }
+}
+```
+
+### 排序
+
 ### 动态规划
 
 #### 1049、最后一块石头的重量II
