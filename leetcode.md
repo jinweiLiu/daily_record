@@ -688,6 +688,78 @@ class Solution {
 
 ### 二分查找
 
+```java
+    //普通二分查找 left <= right
+    public static int binary_search1(int[] a,int n,int target){
+        int left = 0, right = n-1;
+        
+        while(left <= right){
+            int mid = (left + right) / 2;
+            if(a[mid] == target){
+                return mid;
+            }
+            if(a[mid] > target){
+                right = mid - 1;
+            }
+            if(a[mid] < target){
+                left = mid + 1;
+            }
+        }
+        return -1;
+    }
+
+    //普通二分查找 left < right
+    public static int binary_search2(int[] a,int n,int target){
+        int left = 0, right = n-1;
+        
+        while(left < right){
+            int mid = (left + right) / 2;
+            if(a[mid] == target){
+                return mid;
+            }
+            if(a[mid] > target){
+                right = mid;
+            }
+            if(a[mid] < target){
+                left = mid + 1;
+            }
+        }
+        return -1;
+    }
+
+    //寻找左边界
+    public static int left_binary_search(int[] a,int n,int target){
+        int left = 0, right = n-1;
+        int ans = 0;
+        while(left <= right){
+            int mid = (left + right) / 2;
+            if(a[mid] >= target){
+                right = mid - 1;
+                ans = mid;
+            }else{
+                left = mid + 1;
+            }
+        }
+        return ans;
+    }
+
+    //寻找右边界
+    public static int right_binary_search(int[] a,int n,int target){
+        int left = 0, right = n-1;
+        int ans = 0;
+        while(left <= right){
+            int mid = (left + right) / 2;
+            if(a[mid] > target){
+                right = mid - 1;
+                ans = mid;                
+            }else{
+                left = mid + 1;
+            }
+        }
+        return ans;
+    }
+```
+
 #### 374、猜数字大小
 
 猜数字游戏的规则如下：
