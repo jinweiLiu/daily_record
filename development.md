@@ -95,6 +95,7 @@
 - git使用
 
   ```bash
+  rm -rf .git  #删除原有仓库
   git branch  #一般用于分支的操作，比如创建分支，查看分支等等，
     git  branch -a #列出本地分支和远程分支
   git checkout  #一般用于文件的操作和分支的操作
