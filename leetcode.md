@@ -410,7 +410,148 @@ class Solution {
 
 ### 排序
 
+快速排序
 
+```java
+public class QuickSort {
+    public static void main(String[] args) {
+        int[] arr = {5,3,8,1,-1};
+        Quick_Sort(arr,0,arr.length-1);
+        for(int num : arr){
+            System.out.print(num + " ");
+        }
+    }
+
+    public static void Quick_Sort(int[] a, int low, int high){
+        if(low > high){
+            return;
+        }
+        int l,r,temp;
+        l = low;
+        r = high;
+        temp = a[l];
+
+        //循环的作用，保证基准值左边都小于，右边都大于
+        while(l < r){
+            while(l < r && temp <= a[r]){
+                --r;
+            }
+            a[l] = a[r];
+            while(l < r && temp >= a[l]){
+                ++l;
+            }
+            a[r] = a[l];
+        }
+        a[l] = temp;
+        Quick_Sort(a, low, l-1);
+        Quick_Sort(a, l+1, high);
+    }
+}
+```
+
+归并排序
+
+```java
+public class MergeSort {
+	public static void main(String[] args) {
+		int[] arr = {11,44,23,67,88,65,34,48,9,12};
+		int[] tmp = new int[arr.length];    //新建一个临时数组存放
+		mergeSort(arr,0,arr.length-1,tmp);
+		for(int i=0;i<arr.length;i++){
+			System.out.print(arr[i]+" ");
+		}
+	}
+	
+	public static void merge(int[] arr,int low,int mid,int high,int[] tmp){
+		int i = 0;
+		int j = low,k = mid+1;  //左边序列和右边序列起始索引
+		while(j <= mid && k <= high){
+			if(arr[j] < arr[k]){
+				tmp[i++] = arr[j++];
+			}else{
+				tmp[i++] = arr[k++];
+			}
+		}
+		//若左边序列还有剩余，则将其全部拷贝进tmp[]中
+		while(j <= mid){    
+			tmp[i++] = arr[j++];
+		}
+		
+		while(k <= high){
+			tmp[i++] = arr[k++];
+		}
+		
+		for(int t=0;t<i;t++){
+			arr[low+t] = tmp[t];
+		}
+	}
+ 
+	public static void mergeSort(int[] arr,int low,int high,int[] tmp){
+		if(low<high){
+			int mid = (low+high)/2;
+			mergeSort(arr,low,mid,tmp); //对左边序列进行归并排序
+			mergeSort(arr,mid+1,high,tmp);  //对右边序列进行归并排序
+			merge(arr,low,mid,high,tmp);    //合并两个有序序列
+		}
+	}
+	
+}
+```
+
+#### 75、颜色分类
+
+给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
+
+此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。
+
+示例 1：
+
+```
+输入：nums = [2,0,2,1,1,0]
+输出：[0,0,1,1,2,2]
+```
+
+示例 2：
+
+```
+输入：nums = [2,0,1]
+输出：[0,1,2]
+```
+
+**解题思路**：
+
+- 双指针，交换
+- 统计0，1，2的数量，填数
+
+**题解代码**：
+
+```java
+class Solution {
+    public void sortColors(int[] nums) {
+        int n = nums.length;
+        int p0 = 0, p1 = 0;
+        for (int i = 0; i < n; ++i) {
+            if (nums[i] == 1) {
+                int temp = nums[i];
+                nums[i] = nums[p1];
+                nums[p1] = temp;
+                ++p1;
+            } else if (nums[i] == 0) {
+                int temp = nums[i];
+                nums[i] = nums[p0];
+                nums[p0] = temp;
+                if (p0 < p1) {
+                    temp = nums[i];
+                    nums[i] = nums[p1];
+                    nums[p1] = temp;
+                }
+                ++p0;
+                ++p1;
+            }
+        }
+    }
+}
+```
 
 ### 动态规划
 
@@ -423,8 +564,6 @@ class Solution {
 如果 x == y，那么两块石头都会被完全粉碎；
 如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
 最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
-
- 
 
 示例 1：
 
