@@ -2331,3 +2331,83 @@ class Solution {
 }
 ```
 
+#### 5815、扣分后的最大得分
+
+给你一个 m x n 的整数矩阵 points （下标从 0 开始）。一开始你的得分为 0 ，你想最大化从矩阵中得到的分数。
+
+你的得分方式为：每一行 中选取一个格子，选中坐标为 (r, c) 的格子会给你的总得分 增加 points\[r][c] 。
+
+然而，相邻行之间被选中的格子如果隔得太远，你会失去一些得分。对于相邻行 r 和 r + 1 （其中 0 <= r < m - 1），选中坐标为 (r, c1) 和 (r + 1, c2) 的格子，你的总得分 减少 abs(c1 - c2) 。
+
+请你返回你能得到的 最大 得分。
+
+abs(x) 定义为：
+
+如果 x >= 0 ，那么值为 x 。
+如果 x < 0 ，那么值为 -x 。
+
+实例1：
+
+```
+输入：points = [[1,2,3],[1,5,1],[3,1,1]]
+输出：9
+解释：
+蓝色格子是最优方案选中的格子，坐标分别为 (0, 2)，(1, 1) 和 (2, 0) 。
+你的总得分增加 3 + 5 + 3 = 11 。
+但是你的总得分需要扣除 abs(2 - 1) + abs(1 - 0) = 2 。
+你的最终得分为 11 - 2 = 9 。
+```
+
+**解题思路**：
+
+暴力：最普通的方法我们可以想到，$dp[i][j]$表示第i行第j列的元素所能得到的最大分数。
+
+那么对于第i行，我们遍历每个j，针对i-1行的每一个元素计算他们的新得分，就能得到当前元素对应的最高得分：
+
+$$
+dp[i][j] = max(dp[i - 1][k] + abs(k - j))
+$$
+时间复杂度为$O(mn^2)$。
+
+优化：对于当前行的j元素，我们从左到右计算在它左方和上方的最大值 $lmax$。每次右移，$lmax - 1$，于是j元素对应的左边的最大值为 $max(lmax - 1, dp[j])$。同理，右边的最大值为 $max(rmax - 1, dp[j])$。
+
+取 $lmax, rmax, dp[i - 1][j]$的最大值作为当前j元素之前的最大得分，那么再加上当前得分就是$dp[i][j]$对应的最大的分：
+
+$$
+dp[i][j] = max(lmax, rmax, dp[i - 1][j]) + points[i][j]
+$$
+这样把查找的时间从$O(n^2)$降到了$O(n)$, 总的时间复杂度为$O(mn)$。
+
+**题解代码**：
+
+```java
+class Solution {
+    public long maxPoints(int[][] points) {
+        int m = points.length;
+        int n = points[0].length;
+        long[] dp = new long[n];
+        for (int i = 0; i < m; i++) {
+            long[] cur = new long[n + 1];
+            long lmax = 0;
+            for (int j = 0; j < n; j++) {
+                lmax = Math.max(lmax - 1, dp[j]);
+                cur[j] = lmax;
+            }
+            long rmax = 0;
+            for (int j = n - 1; j >= 0; j--) {
+                rmax = Math.max(rmax - 1, dp[j]);
+                cur[j] = Math.max(cur[j], rmax);
+            }
+            for (int j = 0; j < n; j++) {
+                dp[j] = cur[j] + points[i][j];
+            }
+        }
+        long ans = 0;
+        for (int j = 0; j < n; j++) {
+            ans = Math.max(ans, dp[j]);
+        }
+        return ans;
+    }
+}
+```
+
