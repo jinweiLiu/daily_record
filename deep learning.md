@@ -193,7 +193,7 @@ dataset：定义的dataset类返回的结果
 
 batch_size：每个batch要加载的样本数，默认为1。
 
-shuffle：在每个epoch中对整个数据集data进行shuffle重排，默认为False。
+shuffle：在每个epoch中对整个数据集data进行shuffle重排，默认为False。不重排，则按顺序获取。
 
 sample：定义从数据集中加载数据所采用的策略，如果指定的话，shuffle必须为False；batch_sample类似，表示一次返回一个batch的index。
 
