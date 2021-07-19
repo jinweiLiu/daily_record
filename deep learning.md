@@ -205,9 +205,117 @@ pin_memory：表示要将load进来的数据是否要拷贝到pin_memory区中�
 
 drop_last：当你的整个数据长度不能够整除你的batch_size，选择是否要丢弃最后一个不完整的batch，默认为False。
 
-#### 保存模型
+#### 模型保存和加载
+
+简单的保存和加载方法
+
+```python
+# 保存整个网络
+torch.save(net,PATH)
+# 保存网络中的参数，速度快，占用空间少
+torch.save(net.state_dict(),PATH)
+#------------------
+#对应的加载方法
+model_dict = torch.load(PATH)
+model_dict = model.load_state_dict(torch.load(PATH))
+```
+
+然而，在实验中往往需要保存更多的信息，比如优化器的参数，那么可以采取下面的方法保存：
+
+```python
+torch.save({'epoch': epochID + 1, 'state_dict': model.state_dict(), 'best_loss': lossMIN,
+            'optimizer': optimizer.state_dict(),'alpha': loss.alpha, 'gamma': loss.gamma},
+            checkpoint_path + '/m-' + launchTimestamp + '-' + str("%.4f" % lossMIN) + '.pth.tar')
+```
+
+以上包含的信息有，epochID, state_dict, min loss, optimizer, 自定义损失函数的两个参数；格式以字典的格式存储。
+
+加载方式：
+
+```python
+def load_checkpoint(model, checkpoint_PATH, optimizer):
+    if checkpoint != None:
+        model_CKPT = torch.load(checkpoint_PATH)
+        model.load_state_dict(model_CKPT['state_dict'])
+        print('loading checkpoint!')
+        optimizer.load_state_dict(model_CKPT['optimizer'])
+    return model, optimizer
+```
+
+其他的参数可以通过以字典的方式获得。
 
 
+
+冻结部分参数，训练另一部分参数
+
+1）添加下面一句话到模型中
+
+```python
+for p in self.parameters():
+    p.requires_grad = False
+```
+
+比如加载了resnet预训练模型之后，在resenet的基础上连接了新的模快，resenet模块那部分可以先暂时冻结不更新，只更新其他部分的参数，那么可以在下面加入上面那句话
+
+```python
+class RESNET_MF(nn.Module):
+    def __init__(self, model, pretrained):
+        super(RESNET_MF, self).__init__()
+        self.resnet = model(pretrained)
+        for p in self.parameters():
+            p.requires_grad = False
+        self.f = SpectralNorm(nn.Conv2d(2048, 512, 1))
+        self.g = SpectralNorm(nn.Conv2d(2048, 512, 1))
+        self.h = SpectralNorm(nn.Conv2d(2048, 2048, 1))
+        ...
+```
+
+同时在优化器中添加：filter(lambda p: p.requires_grad, model.parameters())
+
+```python
+optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=0.001, betas=(0.9,                                     0.999),eps=1e-08, weight_decay=1e-5)
+```
+
+2) 参数保存在有序的字典中，那么可以通过查找参数的名字对应的id值，进行冻结
+
+查找的代码：
+
+```python
+model_dict = torch.load('net.pth.tar').state_dict()
+dict_name = list(model_dict)
+for i, p in enumerate(dict_name):
+    print(i, p)
+```
+
+保存一下这个文件，可以看到大致是这个样子的：
+
+```text
+0 gamma
+1 resnet.conv1.weight
+2 resnet.bn1.weight
+3 resnet.bn1.bias
+4 resnet.bn1.running_mean
+5 resnet.bn1.running_var
+6 resnet.layer1.0.conv1.weight
+7 resnet.layer1.0.bn1.weight
+8 resnet.layer1.0.bn1.bias
+9 resnet.layer1.0.bn1.running_mean
+....
+```
+
+同样在模型中添加这样的代码：
+
+```python
+for i,p in enumerate(net.parameters()):
+    if i < 165:
+        p.requires_grad = False
+```
+
+在优化器中添加上面的那句话可以实现参数的屏蔽
+
+其他参考：https://www.zhihu.com/question/311095447/answer/589307812
+
+#### 优化器
 
 ### 代码相关
 
