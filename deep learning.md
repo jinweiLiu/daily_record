@@ -317,6 +317,45 @@ for i,p in enumerate(net.parameters()):
 
 #### 优化器
 
+SGD
+
+> class torch.optim.SGD(params, lr=, momentum=0, dampening=0, weight_decay=0, nesterov=False)[source]
+>
+> - params (iterable) – 待优化参数的iterable或者是定义了参数组的dict
+> - lr (float) – 学习率
+> - momentum (float, 可选) – 动量因子（默认：0）
+> - weight_decay (float, 可选) – 权重衰减（L2惩罚）（默认：0）
+> - dampening (float, 可选) – 动量的抑制因子（默认：0）
+> - nesterov (bool, 可选) – 使用Nesterov动量（默认：False）
+
+RMSprop
+
+> class torch.optim.RMSprop(params, lr=0.01, alpha=0.99, eps=1e-08, weight_decay=0, momentum=0, centered=False)[source]
+>
+> - params (iterable) – 待优化参数的iterable或者是定义了参数组的dict
+>
+> - lr (float, 可选) – 学习率（默认：1e-2）
+>
+> - momentum (float, 可选) – 动量因子（默认：0）
+>
+> - alpha (float, 可选) – 平滑常数（默认：0.99）
+>
+> - eps (float, 可选) – 为了增加数值计算的稳定性而加到分母里的项（默认：1e-8）
+>
+> - centered (bool, 可选) – 如果为True，计算中心化的RMSProp，并且用它的方差预测值对梯度进行归一化
+>
+> - weight_decay (float, 可选) – 权重衰减（L2惩罚）（默认: 0）
+
+Adam
+
+> class torch.optim.Adam(params, lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0)[source]
+>
+> - params (iterable) – 待优化参数的iterable或者是定义了参数组的dict
+> - lr (float, 可选) – 学习率（默认：1e-3）
+> - betas (Tuple[float, float], 可选) – 用于计算梯度以及梯度平方的运行平均值的系数（默认：0.9，0.999）
+> - eps (float, 可选) – 为了增加数值计算的稳定性而加到分母里的项（默认：1e-8）
+> - weight_decay (float, 可选) – 权重衰减（L2惩罚）（默认: 0）
+
 ### 代码相关
 
 ```python
