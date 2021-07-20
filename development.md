@@ -268,6 +268,8 @@
 - @Resource  @Autowired
 - Swagger
 - RPC 和 HTTP
+- 全局异常 @ControllerAdvice
+- 数据校验 JSR-303验证框架
 
 #### Windows相关
 
