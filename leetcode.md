@@ -1,3 +1,47 @@
+#### 二叉树
+
+前、中、后序迭代遍历模板
+
+```python
+# 迭代：前、中、后序遍历通用模板（只需一个栈的空间）
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]: 
+        res = []
+        stack = []
+        cur = root
+        # 中序，模板：先用指针找到每颗子树的最左下角，然后进行进出栈操作
+        while stack or cur:
+            while cur:
+                stack.append(cur)
+                cur = cur.left
+            cur = stack.pop()
+            res.append(cur.val)
+            cur = cur.right
+        return res
+        
+        # # 前序，相同模板
+        # while stack or cur:
+        #     while cur:
+        #         res.append(cur.val)
+        #         stack.append(cur)
+        #         cur = cur.left
+        #     cur = stack.pop()
+        #     cur = cur.right
+        # return res
+        
+        # # 后序，相同模板
+        # while stack or cur:
+        #     while cur:
+        #         res.append(cur.val)
+        #         stack.append(cur)
+        #         cur = cur.right
+        #     cur = stack.pop()
+        #     cur = cur.left
+        # return res[::-1] #反转链表
+```
+
+
+
 ### 前缀和
 
 #### 523、连续的子数组和
