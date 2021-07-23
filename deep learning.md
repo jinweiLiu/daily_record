@@ -207,7 +207,7 @@ drop_last：当你的整个数据长度不能够整除你的batch_size，选择�
 
 #### 模型保存和加载
 
-简单的保存和加载方法
+**简单的保存和加载方法**
 
 ```python
 # 保存整个网络
@@ -246,7 +246,7 @@ def load_checkpoint(model, checkpoint_PATH, optimizer):
 
 
 
-冻结部分参数，训练另一部分参数
+**冻结部分参数，训练另一部分参数**
 
 1）添加下面一句话到模型中
 
@@ -795,10 +795,55 @@ random=1                     ★ 为1打开随机多尺度训练，为0则关闭
 
 ![image-20210625182601192](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210625182601192.png)
 $$
-IoU = \frac{|A \cap B|}{|A\cup B|} \\
+IoU = \frac{|A \cap B|}{|A\cup B|} \ \ \ \ \ 
 GIoU = IoU - \frac{|C-(A\cup B)|}{|C|}
 $$
 
+代码实现
+
+```python
+def bboxes_giou(boxes1,boxes2):
+    '''
+    cal GIOU of two boxes or batch boxes
+    such as: (1)
+            boxes1 = np.asarray([[0,0,5,5],[0,0,10,10],[15,15,25,25]])
+            boxes2 = np.asarray([[5,5,10,10]])
+            and res is [-0.49999988  0.25       -0.68749988]
+            (2)
+            boxes1 = np.asarray([[0,0,5,5],[0,0,10,10],[0,0,10,10]])
+            boxes2 = np.asarray([[0,0,5,5],[0,0,10,10],[0,0,10,10]])
+            and res is [1. 1. 1.]
+    :param boxes1:[xmin,ymin,xmax,ymax] or
+                [[xmin,ymin,xmax,ymax],[xmin,ymin,xmax,ymax],...]
+    :param boxes2:[xmin,ymin,xmax,ymax]
+    :return:
+    '''
+    # x1y1x2y2
+    # cal the box's area of boxes1 and boxess
+    boxes1Area = (boxes1[...,2] - boxes1[...,0]) * (boxes1[...,3] - boxes1[...,1])
+    boxes2Area = (boxes2[..., 2] - boxes2[..., 0]) * (boxes2[..., 3] - boxes2[..., 1])
+
+    # ===========cal IOU=============#
+    #cal Intersection
+    left_up = np.maximum(boxes1[...,:2], boxes2[...,:2])
+    right_down = np.minimum(boxes1[...,2:], boxes2[...,2:])
+
+    inter_section = np.maximum(right_down - left_up, 0.0)
+    inter_area = inter_section[...,0] * inter_section[...,1]
+    union_area = boxes1Area + boxes2Area - inter_area
+    ious = np.maximum(1.0 * inter_area / union_area, np.finfo(np.float32).eps)
+
+    # ===========cal enclose area for GIOU=============#
+    enclose_left_up = np.minimum(boxes1[..., :2], boxes2[..., :2])
+    enclose_right_down = np.maximum(boxes1[..., 2:], boxes2[..., 2:])
+    enclose = np.maximum(enclose_right_down - enclose_left_up, 0.0)
+    enclose_area = enclose[..., 0] * enclose[..., 1]
+
+    # cal GIOU
+    gious = ious - 1.0 * (enclose_area - union_area) / enclose_area
+
+    return gious
+```
 
 #### Focal Loss
 

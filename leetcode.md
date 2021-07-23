@@ -126,6 +126,77 @@ class Solution {
 }
 ```
 
+#### 1893、检查是否区域内所有整数都被覆盖
+
+给你一个二维整数数组 ranges 和两个整数 left 和 right 。每个 ranges[i] = [starti, endi] 表示一个从 starti 到 endi 的 闭区间 。
+
+如果闭区间 [left, right] 内每个整数都被 ranges 中 至少一个 区间覆盖，那么请你返回 true ，否则返回 false 。
+
+已知区间 ranges[i] = [starti, endi] ，如果整数 x 满足 starti <= x <= endi ，那么我们称整数x 被覆盖了。
+
+示例 1：
+
+```
+输入：ranges = [[1,2],[3,4],[5,6]], left = 2, right = 5
+输出：true
+解释：2 到 5 的每个整数都被覆盖了：
+
+- 2 被第一个区间覆盖。
+- 3 和 4 被第二个区间覆盖。
+- 5 被第三个区间覆盖。
+```
+
+**解题思路**：
+
+- 排序
+
+- 差分数组，前缀和思想
+
+  差分数组diff表示相邻格之间，是否被覆盖的变化量。
+  diff[i]++,代表在i位置上有新的覆盖
+  若覆盖到j结束了呢？此时j依然是覆盖，但是j+1不在覆盖状态，所以在j+1处 -1；
+  即diff[j+1]--;
+  当我们把差分数组求前缀和，就很直观把这种变化量转化为不变的，可以理解的。
+
+
+题解代码：
+
+```java
+//排序
+class Solution {
+    public boolean isCovered(int[][] ranges, int left, int right) {
+        Arrays.sort(ranges,(a1,a2) -> a1[0] - a2[0]);
+        for(int []range : ranges){
+            if(range[0] <= left && range[1] >= left){
+                left = range[1] + 1;
+            }
+        }
+        return left > right;
+    }
+}
+//差分数组
+class Solution {
+    public boolean isCovered(int[][] ranges, int left, int right) {
+        int[] diff = new int[52];
+        //对差分数组进行处理
+        for(int i = 0; i < ranges.length; i++){
+            diff[ranges[i][0]]++;
+            diff[ranges[i][1]+1]--;
+        }
+        //根据差分数组处理前缀和，为理解方便单独定义sum，可以原地做
+        int[] sum = new int[52];
+        for(int i = 1; i <= 51; i++){
+            sum[i] = sum[i-1] + diff[i];
+        }
+        //从left到right判断是否满足sum > 0
+        for(int i = left; i <= right; i++){
+            if(sum[i] <= 0) return false;
+        }
+        return true;
+    }
+}
+```
+
 ### 哈希表
 
 #### 17.11、大餐计数
