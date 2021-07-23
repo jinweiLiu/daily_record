@@ -280,7 +280,11 @@
 sc.exe delete "YourServiceName"
 ```
 
-#### maven相关
+host文件的位置
+
+> C:\Windows\System32\drivers\etc
+
+#### Maven相关
 
 在用maven构建java项目时，最常用的打包命令有mvn package、mvn install、deploy，这三个命令都可完成打jar包或war（当然也可以是其它形式的包）的功能，但这三个命令还是有区别的。
 
