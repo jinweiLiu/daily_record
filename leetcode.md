@@ -1038,7 +1038,7 @@ class Solution {
 }
 ```
 
-### 
+
 
 ### 数学
 
@@ -2977,6 +2977,101 @@ public class Solution {
             }
         }
         return dp[0][len - 1];
+    }
+}
+```
+
+#### 300、最长递增子序列
+
+给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。
+
+子序列是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。
+
+
+示例 1：
+
+```
+输入：nums = [10,9,2,5,3,7,101,18]
+输出：4
+解释：最长递增子序列是 [2,3,7,101]，因此长度为 4 。
+```
+
+示例 2：
+
+```
+输入：nums = [0,1,0,3,2,3]
+输出：4
+```
+
+**解题思路**：
+
+- 动态规划
+
+  定义 dp[i] 为前 i 个元素，以第 i 个数字结尾的最长上升子序列。
+
+  $d[i] = max(dp[j]) + 1，其中0<=j<i且num[j] < num[i]$
+
+- 贪心和二分查找
+
+  维护一个单调数组 d[i] ，表示长度为 i 的最长上升子序列的末尾元素的最小值，用 len 记录目前最长上升子序列的长度，起始时 len 为 1，d[1]=nums[0]。
+
+  我们依次遍历数组 nums 中的每个元素，并更新数组 d 和 len 的值。如果 nums[i]>d[len] 则更新 len=len+1，否则在 d[1…len]中找满足 d[i−1]<nums[j]<d[i] 的下标 ii，并更新 d[i]=nums[j]。
+
+  根据 d 数组的单调性，我们可以使用二分查找寻找下标 i，优化时间复杂度。
+
+
+**题解代码**：
+
+```java
+//动态规划
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        if (nums.length == 0) {
+            return 0;
+        }
+        int[] dp = new int[nums.length];
+        dp[0] = 1;
+        int maxans = 1;
+        for (int i = 1; i < nums.length; i++) {
+            dp[i] = 1;
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    dp[i] = Math.max(dp[i], dp[j] + 1);
+                }
+            }
+            maxans = Math.max(maxans, dp[i]);
+        }
+        return maxans;
+    }
+}
+
+//贪心 + 二分查找
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int len = 1, n = nums.length;
+        if (n == 0) {
+            return 0;
+        }
+        int[] d = new int[n + 1];
+        d[len] = nums[0];
+        for (int i = 1; i < n; ++i) {
+            if (nums[i] > d[len]) {
+                d[++len] = nums[i];
+            } else {
+                int l = 1, r = len, pos = 0; // 如果找不到说明所有的数都比 nums[i] 大，此时要更新 d[1]，所以这里将 pos 设为 0
+                while (l <= r) {
+                    int mid = (l + r) >> 1;
+                    if (d[mid] < nums[i]) {
+                        pos = mid;
+                        l = mid + 1;
+                    } else {
+                        r = mid - 1;
+                    }
+                }
+                d[pos + 1] = nums[i];
+            }
+        }
+        return len;
     }
 }
 ```
