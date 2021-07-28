@@ -295,6 +295,65 @@
 
 - 令牌桶
 
+  限流是对某一时间窗口内的请求数进行限制，保持系统的可用性和稳定性，防止因流量暴增而导致的系统运行缓慢或宕机。常用的限流算法有令牌桶和和漏桶，而Google开源项目Guava中的RateLimiter使用的就是令牌桶控制算法。
+
+  令牌桶算法的原理是系统以恒定的速率产生令牌，然后把令牌放到令牌桶中，令牌桶有一个容量，当令牌桶满了的时候，再向其中放令牌，那么多余的令牌会被丢弃；当想要处理一个请求的时候，需要从令牌桶中取出一个令牌，如果此时令牌桶中没有令牌，那么则拒绝该请求。
+
+  <img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210728111325543.png" alt="image-20210728111325543" style="zoom:67%;" />
+
+  简单实现：
+
+  ```java
+  import java.util.concurrent.ArrayBlockingQueue;
+  import java.util.concurrent.Executors;
+  import java.util.concurrent.TimeUnit;
+  
+  public class TokenLimiter {
+      private ArrayBlockingQueue<String> blockingQueue;
+      private int limit;
+      private TimeUnit timeUnit;
+      private int period;
+  
+      public TokenLimiter(int limit, int period, TimeUnit timeUnit){
+          this.limit = limit;
+          this.period = period;
+          this.timeUnit = timeUnit;
+          blockingQueue = new ArrayBlockingQueue<>(limit);
+          init();
+          start();
+      }
+  
+      /**
+       * 初始化令牌桶
+       */
+      public void init(){
+          for(int i = 0; i < limit; ++i){
+              blockingQueue.add("1");
+          }
+      }
+  
+      /**
+       * 获取令牌，如果令牌桶为空，返回false
+       */
+      public boolean tryAcquire(){
+          return blockingQueue.poll() == null ? false : true;
+      }
+  
+      private void addTokend(){
+          blockingQueue.offer("1");
+      }
+  
+      /**
+       * 开启一个定时线程执行添加令牌
+       */
+      private void start(){
+          Executors.newScheduledThreadPool(1).scheduleAtFixedRate(() -> addTokend(), 10, period, timeUnit);
+      }
+  }
+  ```
+
+- 秒杀系统学习 https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484174&idx=1&sn=235af7ead49a7d33e7fab52e05d5021f&lang=zh_CN#rd
+
 #### Windows相关
 
 删除服务
