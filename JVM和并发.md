@@ -58,6 +58,8 @@ AQS是一个FIFO的双向队列，其内部通过节点head和tail记录队首�
 
 AQS有个内部类ConditionObject，用来结合锁实现线程同步。ConditionObject可以直接访问AQS对象内部的变量，比如state状态值和AQS队列。ConditionObject是条件变量，每个条件变量对应一个条件队列（单向链表队列），其用来存放调用条件变量的await方法后被阻塞的线程，如类图所示，这个条件队列的头、尾元素分别为firstWaiter和lastWaiter。
 
+### 线程池
+
 ## JVM
 
 ### 参数设置

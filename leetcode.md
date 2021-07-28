@@ -178,7 +178,84 @@ class Solution {
 }
 ```
 
+#### 863、二叉树中所有距离为K的结点
 
+给定一个二叉树（具有根结点 root）， 一个目标结点 target ，和一个整数值 K 。
+
+返回到目标结点 target 距离为 K 的所有结点的值的列表。 答案可以以任何顺序返回。
+
+示例 1：
+
+```
+输入：root = [3,5,1,6,2,0,8,null,null,7,4], target = 5, K = 2
+输出：[7,4,1]
+解释：
+所求结点为与目标结点（值为 5）距离为 2 的结点，
+值分别为 7，4，以及 1
+```
+
+![image-20210728085646132](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210728085646132.png)
+
+**解题思路**：
+
+深度优先搜索 + 哈希表
+
+若将 target 当作树的根结点，我们就能从 target 出发，使用深度优先搜索去寻找与 target 距离为 k 的所有结点，即深度为 k 的所有结点。
+
+由于输入的二叉树没有记录父结点，为此，我们从根结点 root 出发，使用深度优先搜索遍历整棵树，同时用一个哈希表记录每个结点的父结点。
+
+然后从 target 出发，使用深度优先搜索遍历整棵树，除了搜索左右儿子外，还可以顺着父结点向上搜索。
+
+**题解代码**：
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    Map<Integer,TreeNode> map = new HashMap<>();
+    List<Integer> ans = new ArrayList<>();
+    public List<Integer> distanceK(TreeNode root, TreeNode target, int k) {
+        findParent(root);
+        findAns(target,null,0,k);
+        return ans;
+    }
+    public void findParent(TreeNode node){
+        if(node.left != null){
+            map.put(node.left.val,node);
+            findParent(node.left);
+        }
+        if(node.right != null){
+            map.put(node.right.val,node);
+            findParent(node.right);
+        }
+    }
+    public void findAns(TreeNode node, TreeNode pre, int depth, int k){
+        if(node == null){
+            return;
+        }
+        if(depth == k){
+            ans.add(node.val);
+            return;
+        }
+        if(node.left != pre){
+            findAns(node.left,node,depth+1,k);
+        }
+        if(node.right != pre){
+            findAns(node.right,node,depth+1,k);
+        }
+        if(map.get(node.val) != pre){
+            findAns(map.get(node.val),node,depth+1,k);
+        }
+    }
+}
+```
 
 ### 前缀和
 
