@@ -262,14 +262,38 @@
 #### Spring boot相关
 
 - 整合shiro 安全框架
+
 - 整合elasticsearch 全文搜索
+
 - hutool工具包，Hutool是一个Java工具包类库，对文件、流、加密解密、转码、正则、线程、XML等JDK方法进行封装，组成各种Util工具类 [Hutool](https://www.hutool.cn/)
+
 - RestTemplate
+
 - @Resource  @Autowired
+
 - Swagger
+
 - RPC 和 HTTP
+
 - 全局异常 @ControllerAdvice
+
 - 数据校验 JSR-303验证框架
+
+- @Transactional
+
+  >@Transactional 是声明式事务管理 编程中使用的注解
+  >
+  >添加位置
+  >
+  >1）接口实现类或接口实现方法上，而不是接口类中。
+  >2）访问权限：public 的方法才起作用。@Transactional 注解应该只被应用到 public 方法上，这是由 Spring AOP 的本质决定的。
+  >系统设计：将标签放置在需要进行事务管理的方法上，而不是放在所有接口实现类上：只读的接口就不需要事务管理，由于配置了@Transactional就需要AOP拦截及事务的处理，可能影响系统性能。
+  >
+  >属性设置
+  >
+  >https://www.jianshu.com/p/907a895587bf
+
+- 令牌桶
 
 #### Windows相关
 
