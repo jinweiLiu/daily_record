@@ -90,7 +90,7 @@
 
 ![image-20210528214640225](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210528214640225.png)
 
-#### git相关
+#### Git相关
 
 - git使用
 
@@ -119,6 +119,21 @@
 - 设置忽略文件
 
   .gitignore
+  
+- git用户名和密码设定
+
+  ```bash
+  #设置git用户名/邮箱
+  git config --global credential.helper store
+  git config user.name 'github用户名'
+  git config user.email '邮箱'
+  
+  #查看配置
+  git config --list
+  
+  #清除掉缓存在git中的用户名和密码
+  git credential-manager uninstall
+  ```
 
 #### web相关
 
