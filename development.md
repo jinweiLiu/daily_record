@@ -381,6 +381,10 @@ sc.exe delete "YourServiceName"
 host文件的位置
 
 > C:\Windows\System32\drivers\etc
+>
+> 刷新DNS
+>
+> ipconfig /flushdns 
 
 #### Maven相关
 
