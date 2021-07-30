@@ -178,6 +178,56 @@ class Solution {
 }
 ```
 
+#### 108、将有序数组转换为二叉搜索树
+
+给你一个整数数组 nums ，其中元素已经按 升序 排列，请你将其转换为一棵 高度平衡 二叉搜索树。
+
+高度平衡 二叉树是一棵满足「每个节点的左右两个子树的高度差的绝对值不超过 1 」的二叉树。
+
+**示例 1：**
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210730105117671.png" alt="image-20210730105117671" style="zoom:67%;" />
+
+```
+输入：nums = [-10,-3,0,5,9]
+输出：[0,-3,9,-10,null,5]
+解释：[0,-10,5,null,-3,null,9] 也将被视为正确答案：
+```
+
+**解题思路**：
+
+给定二叉搜索树的中序遍历，是否可以唯一地确定二叉搜索树？答案是否定的。如果没有要求二叉搜索树的高度平衡，则任何一个数字都可以作为二叉搜索树的根节点，因此可能的二叉搜索树有多个。
+
+如果增加一个限制条件，即要求二叉搜索树的高度平衡，是否可以唯一地确定二叉搜索树？答案仍然是否定的。
+
+直观地看，我们可以选择中间数字作为二叉搜索树的根节点，这样分给左右子树的数字个数相同或只相差 11，可以使得树保持平衡。如果数组长度是奇数，则根节点的选择是唯一的，如果数组长度是偶数，则可以选择中间位置左边的数字作为根节点或者选择中间位置右边的数字作为根节点，选择不同的数字作为根节点则创建的平衡二叉搜索树也是不同的。
+
+**题目109、有序链表转换为二叉树** 利用快慢指针找到链表的中点
+
+**题解代码**：
+
+```java
+class Solution {
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return helper(nums, 0, nums.length - 1);
+    }
+
+    public TreeNode helper(int[] nums, int left, int right) {
+        if (left > right) {
+            return null;
+        }
+
+        // 总是选择中间位置左边的数字作为根节点
+        int mid = (left + right) / 2;
+
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = helper(nums, left, mid - 1);
+        root.right = helper(nums, mid + 1, right);
+        return root;
+    }
+}
+```
+
 #### 863、二叉树中所有距离为K的结点
 
 给定一个二叉树（具有根结点 root）， 一个目标结点 target ，和一个整数值 K 。
