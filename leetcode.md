@@ -53,6 +53,123 @@ class Solution {
 }
 ```
 
+#### 457、环形数组是否存在循环
+
+存在一个不含 0 的 环形 数组 nums ，每个 nums[i] 都表示位于下标 i 的角色应该向前或向后移动的下标个数：
+
+- 如果 nums[i] 是正数，向前 移动 nums[i] 步
+- 如果 nums[i] 是负数，向后 移动 nums[i] 步
+
+因为数组是 环形 的，所以可以假设从最后一个元素向前移动一步会到达第一个元素，而第一个元素向后移动一步会到达最后一个元素。
+
+数组中的 循环 由长度为 k 的下标序列 seq ：
+
+- 遵循上述移动规则将导致重复下标序列 seq[0] -> seq[1] -> ... -> seq[k - 1] -> seq[0] -> ...
+- 所有 nums[seq[j]] 应当不是 全正 就是 全负
+- k > 1
+
+如果 nums 中存在循环，返回 true ；否则，返回 false 。
+
+示例 1：
+
+```
+输入：nums = [2,-1,1,2,2]
+输出：true
+解释：存在循环，按下标 0 -> 2 -> 3 -> 0 。循环长度为 3 。
+```
+
+示例 2：
+
+```
+输入：nums = [-1,2]
+输出：false
+解释：按下标 1 -> 1 -> 1 ... 的运动无法构成循环，因为循环的长度为 1 。根据定义，循环的长度必须大于 1 。
+```
+
+**解题思路**：
+
+DFS
+
+做深度优先搜素，利用字典visited来标记已经搜素过的节点。
+利用numSet记录在一个方向上遇到的节点，如果新节点在numSet就有环。但需要在三个情况清空numSet：
+
+- 从i节点开始DFS到底了，从i+1节点开始搜素时清空numSet.
+- 当搜素方向direction改变符号，按题意要求同方向，清空numSet.
+- 当一个节点的下一个节点是自身，清空numSet.
+
+快慢指针
+
+**题解代码**：
+
+```python
+#暴力法
+class Solution:
+    def circularArrayLoop(self, nums: List[int]) -> bool:
+        n = len(nums)
+        visited = set()
+        for i in range(n):
+            if i not in visited:
+                direction = nums[i]
+                visited.add(i)
+                numSet = set()
+                numSet.add(i)
+                j = (i + nums[i]) % n
+                while j not in visited:
+                    visited.add(j)
+                    if nums[j] * direction < 0: #方向改变，numSet清空
+                        direction = nums[j]
+                        numSet = set()
+                        numSet.add(j)
+                        j = (n + j + nums[j]) % n
+                    else:
+                        numSet.add(j)
+                        j = (n + j + nums[j]) % n
+                    if (n + j + nums[j]) % n == j: #下一步回到当前位置，numSet清空
+                        numSet = set()
+                    elif j in numSet and len(numSet) >= 2:
+                        return True
+        return False
+```
+
+```java
+//快慢指针
+class Solution {
+    public boolean circularArrayLoop(int[] nums) {
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            if (nums[i] == 0) {
+                continue;
+            }
+            int slow = i, fast = next(nums, i);
+            // 判断非零且方向相同
+            while (nums[slow] * nums[fast] > 0 && nums[slow] * nums[next(nums, fast)] > 0) {
+                if (slow == fast) {
+                    if (slow != next(nums, slow)) {
+                        return true;
+                    } else {
+                        break;
+                    }
+                }
+                slow = next(nums, slow);
+                fast = next(nums, next(nums, fast));
+            }
+            int add = i;
+            while (nums[add] * nums[next(nums, add)] > 0) {
+                int tmp = add;
+                add = next(nums, add);
+                nums[tmp] = 0;
+            }
+        }
+        return false;
+    }
+
+    public int next(int[] nums, int cur) {
+        int n = nums.length;
+        return ((cur + nums[cur]) % n + n) % n; // 保证返回值在 [0,n) 中
+    }
+}
+```
+
 ### 二叉树
 
 参考链接：[二叉树所有遍历模板及知识点总结](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/python3-er-cha-shu-suo-you-bian-li-mo-ban-ji-zhi-s/)
