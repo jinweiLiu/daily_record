@@ -1190,7 +1190,63 @@ class Solution {
 }
 ```
 
+#### 567、字符串的排列
 
+给你两个字符串 s1 和 s2 ，写一个函数来判断 s2 是否包含 s1 的排列。
+
+换句话说，s1 的排列之一是 s2 的 子串 。
+
+ 
+
+示例 1：
+
+```
+输入：s1 = "ab" s2 = "eidbaooo"
+输出：true
+解释：s2 包含 s1 的排列之一 ("ba").
+```
+
+示例 2：
+
+```
+输入：s1= "ab" s2 = "eidboaoo"
+输出：false
+```
+
+**解题思路**：
+
+滑动窗口，数组统计s1的字符情况，具体见代码。
+
+**题解代码**：
+
+```java
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+        int n = s1.length(), m = s2.length();
+        if(n > m){
+            return false;
+        }
+        int []cnt = new int[26];
+        for(int i = 0; i < n; ++i){
+            --cnt[s1.charAt(i) - 'a'];
+        }
+        int left = 0, right = 0;
+        while(right < m){
+            int idx = s2.charAt(right) - 'a';
+            ++cnt[idx];
+            while(cnt[idx] > 0){
+                --cnt[s2.charAt(left) - 'a'];
+                ++left;
+            }
+            if(right - left + 1 == n){
+                return true;
+            }
+            ++right;
+        }
+        return false;
+    }
+}
+```
 
 ### 二分查找
 
