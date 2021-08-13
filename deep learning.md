@@ -999,3 +999,7 @@ if __name__ == "__main__":
 2、抽取Conv4_3、Conv7、Conv8_2、Conv9_2、Conv10_2、Conv11_2层的feature map，然后分别在这些feature map层上面的每一个点构造6个不同尺度大小的bbox，然后分别进行检测和分类，生成多个bbox，如图2所示；
 
 3、将不同feature map获得的bbox结合起来，经过NMS（非极大值抑制）方法来抑制掉一部分重叠或者不正确的bbox，生成最终的bbox集合（即检测结果）；
+
+### Tricks
+
+#### 标签平滑
