@@ -94,7 +94,7 @@ DFS
 利用numSet记录在一个方向上遇到的节点，如果新节点在numSet就有环。但需要在三个情况清空numSet：
 
 - 从i节点开始DFS到底了，从i+1节点开始搜素时清空numSet.
-- 当搜素方向direction改变符号，按题意要求同方向，清空numSet.
+- 当搜索方向direction改变符号，按题意要求同方向，清空numSet.
 - 当一个节点的下一个节点是自身，清空numSet.
 
 快慢指针
@@ -295,13 +295,15 @@ $$
 ```java
 class Solution {  //头插法
     public ListNode reverseList(ListNode head) {
-        if(head == null || head.next == null){
-            return head;
+        ListNode pre = null;
+        ListNode tmp = head;
+        while(tmp != null){
+            ListNode next = tmp.next;
+            tmp.next = pre;
+            pre = tmp;
+            tmp = next;
         }
-        ListNode newHead = reverseList(head.next);
-        head.next.next = head;
-        head.next = null;
-        return newHead;
+        return pre;
     }
 }
 ```
