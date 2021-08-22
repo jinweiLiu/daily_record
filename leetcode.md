@@ -886,9 +886,9 @@ class Solution {
 
 (2) 前缀和+哈希表
 
-- 创建一个哈希表，keykey来储存当前前缀和的余数，valuevalue则储存对应的indexindex
+- 创建一个哈希表，key来储存当前前缀和的余数，value则储存对应的index
 
-- 如果哈希表中存在其对应的余数，我们则取出其pospos，看当前的下标 indexindex 到 pospos的距离是否大于2.（题目要求）如果是则返回true。不是我们则继续遍历。不要更新哈希表中的下标！(贪心的思维)
+- 如果哈希表中存在其对应的余数，我们则取出其pos，看当前的下标 index 到 pos的距离是否大于2.（题目要求）如果是则返回true。不是我们则继续遍历。不要更新哈希表中的下标！(贪心的思维)
 
 - 如果不存在则将当前余数与其对应的下标储存在哈希表中。
 
@@ -1050,7 +1050,7 @@ class Solution {
 
 ### 哈希表
 
-哈希表与树结合，可以存储父节点
+哈希表与树结合，可以存储父节点（二叉树中所有距离为K的节点）
 
 #### 17.11、大餐计数
 
@@ -1348,8 +1348,6 @@ class Solution {
 
 换句话说，s1 的排列之一是 s2 的 子串 。
 
- 
-
 示例 1：
 
 ```
@@ -1568,6 +1566,24 @@ arr[i] > arr[i+1] > ... > arr[arr.length - 1]
 **题解代码**：
 
 ```java
+//一次遍历
+class Solution {
+    public int peakIndexInMountainArray(int[] arr) {
+        int n = arr.length;
+        int ans = -1;
+        for (int i = 1; i < n - 1; ++i) {
+            if (arr[i] > arr[i + 1]) {
+                ans = i;
+                break;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```java
+//二分查找
 class Solution {
     public int peakIndexInMountainArray(int[] arr) {
         int n = arr.length;
