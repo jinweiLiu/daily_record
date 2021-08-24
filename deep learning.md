@@ -95,6 +95,22 @@ $$
 softmax(x)_i = \frac{exp(x_i)}{\sum_jexp(x_j)}
 $$
 
+#### Numpy
+
+- list to numpy
+
+  ```python
+  a = [1,3]
+  b = np.array(a)
+  ```
+
+- numpy to list
+
+  ```python
+  a = np.zero(1,1)
+  a.tolist()
+  ```
+
 ### PyTorch
 
 - tensor to numpy
@@ -355,6 +371,10 @@ Adam
 > - betas (Tuple[float, float], 可选) – 用于计算梯度以及梯度平方的运行平均值的系数（默认：0.9，0.999）
 > - eps (float, 可选) – 为了增加数值计算的稳定性而加到分母里的项（默认：1e-8）
 > - weight_decay (float, 可选) – 权重衰减（L2惩罚）（默认: 0）
+
+#### 基本流程
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210824160643706.png" alt="image-20210824160643706" style="zoom:80%;" />
 
 ### 代码相关
 
@@ -1000,6 +1020,4 @@ if __name__ == "__main__":
 
 3、将不同feature map获得的bbox结合起来，经过NMS（非极大值抑制）方法来抑制掉一部分重叠或者不正确的bbox，生成最终的bbox集合（即检测结果）；
 
-### Tricks
-
-#### 标签平滑
+#### 
