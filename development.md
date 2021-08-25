@@ -114,6 +114,8 @@
   git pull
   
   git checkout . #放弃当前所有本地修改
+  
+  git commit --amend  #修改commit信息，输入命令后进入vim模式
   ```
 
 - 设置忽略文件
