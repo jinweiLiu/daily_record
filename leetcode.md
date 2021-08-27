@@ -371,6 +371,101 @@ class Solution {
 }
 ```
 
+### 栈和队列
+
+#### 232、栈实现队列
+
+请你仅使用两个栈实现先入先出队列。队列应当支持一般队列支持的所有操作（`push`、`pop`、`peek`、`empty`）
+
+```java
+//弹出时考虑先先将1中数据转移到2中
+class MyQueue {
+
+    Stack<Integer> p;
+    Stack<Integer> q;
+
+    /** Initialize your data structure here. */
+    public MyQueue() {
+        p = new Stack<>();
+        q = new Stack<>();
+    }
+    
+    /** Push element x to the back of queue. */
+    public void push(int x) {
+        p.push(x);
+    }
+    
+    /** Removes the element from in front of queue and returns that element. */
+    public int pop() {
+        if(q.isEmpty()){
+            while(!p.isEmpty()){
+                q.push(p.pop());
+            }
+        }
+        return q.pop();
+    }
+    
+    /** Get the front element. */
+    public int peek() {
+        if(q.isEmpty()){
+            while(!p.isEmpty()){
+                q.push(p.pop());
+            }
+        }
+        return q.peek();
+    }
+    
+    /** Returns whether the queue is empty. */
+    public boolean empty() {
+        return p.isEmpty() && q.isEmpty();
+    }
+}
+```
+
+#### 225、用队列实现栈
+
+请你仅使用两个队列实现一个后入先出（LIFO）的栈，并支持普通栈的全部四种操作（`push`、`top`、`pop` 和 `empty`）。
+
+```java
+//添加时考虑将队列1中数据转入2中，然后两者互换
+class MyStack {
+    Queue<Integer> queue1;
+    Queue<Integer> queue2;
+
+    /** Initialize your data structure here. */
+    public MyStack() {
+        queue1 = new LinkedList<Integer>();
+        queue2 = new LinkedList<Integer>();
+    }
+    
+    /** Push element x onto stack. */
+    public void push(int x) {
+        queue2.offer(x);
+        while (!queue1.isEmpty()) {
+            queue2.offer(queue1.poll());
+        }
+        Queue<Integer> temp = queue1;
+        queue1 = queue2;
+        queue2 = temp;
+    }
+    
+    /** Removes the element on top of the stack and returns that element. */
+    public int pop() {
+        return queue1.poll();
+    }
+    
+    /** Get the top element. */
+    public int top() {
+        return queue1.peek();
+    }
+    
+    /** Returns whether the stack is empty. */
+    public boolean empty() {
+        return queue1.isEmpty();
+    }
+}
+```
+
 ### 二叉树
 
 参考链接：[二叉树所有遍历模板及知识点总结](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/python3-er-cha-shu-suo-you-bian-li-mo-ban-ji-zhi-s/)

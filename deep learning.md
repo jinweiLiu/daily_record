@@ -115,6 +115,8 @@ $$
 
 #### numpy文件存取-npz,npy
 
+https://blog.csdn.net/xiewenbo/article/details/73832027
+
 ### PyTorch
 
 - tensor to numpy
