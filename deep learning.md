@@ -95,7 +95,9 @@ $$
 softmax(x)_i = \frac{exp(x_i)}{\sum_jexp(x_j)}
 $$
 
-#### Numpy
+### Numpy
+
+#### list和numpy的互转
 
 - list to numpy
 
@@ -110,6 +112,8 @@ $$
   a = np.zero(1,1)
   a.tolist()
   ```
+
+#### numpy文件存取-npz,npy
 
 ### PyTorch
 
