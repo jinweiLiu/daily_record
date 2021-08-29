@@ -526,6 +526,8 @@ class Solution {
 }
 ```
 
+**ps：中缀式转后缀式也采用栈，对于操作符赋予不同的优先级**
+
 ### 二叉树
 
 参考链接：[二叉树所有遍历模板及知识点总结](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/python3-er-cha-shu-suo-you-bian-li-mo-ban-ji-zhi-s/)
@@ -1248,6 +1250,58 @@ class Solution {
             if(sum[i] <= 0) return false;
         }
         return true;
+    }
+}
+```
+
+#### 1588、所有奇数长度子数组的和
+
+给你一个正整数数组 arr ，请你计算所有可能的奇数长度子数组的和。
+
+子数组 定义为原数组中的一个连续子序列。
+
+请你返回 arr 中 所有奇数长度子数组的和 。
+
+示例 1：
+
+```
+输入：arr = [1,4,2,5,3]
+输出：58
+解释：所有奇数长度子数组和它们的和为：
+[1] = 1
+[4] = 4
+[2] = 2
+[5] = 5
+[3] = 3
+[1,4,2] = 7
+[4,2,5] = 11
+[2,5,3] = 10
+[1,4,2,5,3] = 15
+我们将所有值求和得到 1 + 4 + 2 + 5 + 3 + 7 + 11 + 10 + 15 = 58
+```
+
+**解题思路**：
+
+前缀和，再统计奇数子数组的和
+
+**题解代码**：
+
+```java
+class Solution {
+    public int sumOddLengthSubarrays(int[] arr) {
+        int n = arr.length;
+        int []sum = new int[n + 1];
+        sum[0] = 0;
+        for(int i = 1; i <= n; ++i){
+            sum[i] = sum[i - 1] + arr[i - 1];
+        }
+        int res = 0;
+        for(int i = 0; i < n; ++i){
+            for(int j = 1; i + j - 1 < n; j += 2){
+                res += sum[i+j] - sum[i];
+            }
+        }
+        return res;
     }
 }
 ```
