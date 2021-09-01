@@ -1027,3 +1027,7 @@ if __name__ == "__main__":
 3、将不同feature map获得的bbox结合起来，经过NMS（非极大值抑制）方法来抑制掉一部分重叠或者不正确的bbox，生成最终的bbox集合（即检测结果）；
 
 #### 
+
+#### Meta learning
+
+N-way K-shot的理解
