@@ -14,8 +14,9 @@
 #### 3、标签平滑的作用
 
 - 在几乎所有的情况下，使用标签平滑训练可以产生更好的校准网络，从而更好地去泛化网路，最终对不可见的生产数据产生更准确的预测。因此，标签平滑应该是大多数深度学习训练的一部分。
-
 - 平滑就是一定程度缩小label中min和max的差距，label平滑可以减小过拟合，提高模型的泛化能力。
+
+Label Smoothing 是在论文《Rethinking the Inception Architecture for Computer Vision》中提到的一种对于输出进行正则化的方法。核心就是对 label 进行 soft 操作，不要给 0 或者 1 的标签，而是有一个偏移，相当于在原 label 上增加噪声，让模型的预测值不要过度集中于概率较高的类别，把一些概率放在概率较低的类别。
 
 #### 4、1*1的卷积
 
@@ -24,3 +25,10 @@
 
 #### 5、ResNet中的BasicBlock与bottleneck
 
+#### 6、数据增强策略
+
+- Cutout
+
+  《Improved Regularization of Convolutional Neural Networks with Cutout》
+
+  随机的将样本中的部分区域 cut 掉，并且填充 0 像素值，分类的结果不变
