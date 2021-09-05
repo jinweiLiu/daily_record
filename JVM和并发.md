@@ -58,6 +58,10 @@ public class Hello{
 
 - interrupt、isInterrupted、interrupted
 
+  - void interrupt方法，中断线程，例如，当线程A运行时，线程B可以调用线程A的interrupt（）方法来设置线程A的中断标志为true并立即返回。设置标志仅仅是设置标志，线程A实际并没有被中断，它会继续往下执行。如果线程A因为调用了wait系列函数、join方法或者sleep方法而被阻塞挂起，这时候若线程B调用线程A的interrupt（）方法，线程A会在调用这些方法的地方抛出InterruptedException异常而返回。
+  - boolean isInterrupted方法，检测当前线程是否被中断，如果是返回true，否则返回false.
+  - boolean interrupted方法，检测当前线程是否被中断，如果是返回true，否则返回false。与isInterrupted不同的是，该方法如果发现当前线程被中断，则会清除中断标志，并且该方法是static方法，可以通过Thread类直接调用。另外在interrupted（）内部是获取当前调用线程的中断标志而不是调用interrupted（）方法的实例对象的中断标志
+
 ### AQS
 
 AQS是一个FIFO的双向队列，其内部通过节点head和tail记录队首和队尾元素，队列元素类型为Node。其中Node中的thread变量用来存放进入AQS队列里面的线程；Node节点内部的SHARED用来标记该线程是获取共享资源时被阻塞挂起后放入AQS队列的，EXCLUSIVE用来标记线程是获取独占资源时被挂起后放入AQS队列的。
