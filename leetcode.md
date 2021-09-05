@@ -2415,6 +2415,48 @@ class Solution {
 }
 ```
 
+#### 470、用rand7()实现rand10()
+
+已有方法 rand7 可生成 1 到 7 范围内的均匀随机整数，试写一个方法 rand10 生成 1 到 10 范围内的均匀随机整数。
+
+不要使用系统的 Math.random() 方法。
+
+示例 1:
+
+```
+输入: 1
+输出: [7]
+```
+
+示例 2:
+
+```
+输入: 2
+输出: [8,4]
+```
+
+**解题思路**：
+
+拒绝采样
+
+可以调用两次 $\textit{Rand7()}$​，那么可以生成 $[1, 49]$​ 之间的随机整数，我们只用到其中的前 $40$​ 个用来实现 $\textit{Rand10()}$​，而拒绝剩下的 99 个数
+
+**题解代码**：
+
+```java
+class Solution extends SolBase {
+    public int rand10() {
+        int row, col, idx;
+        do {
+            row = rand7();
+            col = rand7();
+            idx = col + (row - 1) * 7;
+        } while (idx > 40);
+        return 1 + (idx - 1) % 10;
+    }
+}
+```
+
 ### 回溯
 
 #### 1239、串联字符串的最长长度
