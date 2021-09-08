@@ -589,3 +589,4 @@ host文件的位置
 
   排他锁（X）：SELECT * FROM table_name WHERE ... FOR UPDATE
 
+##### 读写分离
