@@ -572,6 +572,163 @@ class Solution {
 
 **ps：中缀式转后缀式也采用栈，对于操作符赋予不同的优先级**
 
+### 堆
+
+#### 堆排序
+
+```java
+/**
+ * 堆排序
+ * 有效数据从0开始，
+ * 所以一个节点i，其对应二叉树左右子节点下标分别为2*i+1以及2*i+2
+ */
+public class MaxHeapSort {
+ 
+    @Test
+    public void test(){
+        int[] array= {2,8,14,4,16,7,1,10,9,3};
+        heapSort(array);
+        //输出堆排序结果
+        for(int i:array){
+            println(i);
+        }
+    }
+ 
+    /**
+     * 堆排序
+     * @param array
+     */
+    public void heapSort(int[] array){
+        //初始化大顶堆
+        buildMaxHeap(array);
+        //堆排序
+        int heapSize = array.length;
+        //最外层是循环次数，循环到最后大顶堆只有一个元素时停止，所以循环次数为array.length-1
+        for(int i=0;i<array.length-1;i++){
+            //交换a[0]与大顶堆最后一个元素(不包括已排好序的节点)
+            swap(array,0,heapSize-1);
+            //大顶堆数据减少一个
+            heapSize--;
+            //我这里array[0]也是有效数据，所以maxHeepify的第二个参数一致是0
+            maxHeepify(array,0,heapSize);
+        }
+    }
+ 
+    /**
+     * 初始化大顶堆
+     */
+    private void buildMaxHeap(int[] array){
+        int len = array.length;
+        for(int i= (array.length-2)/2;i>=0;i--){
+            maxHeepify(array,i,len);
+        }
+    }
+    /**
+     *
+     * @param arr
+     * @param i
+     */
+    private void maxHeepify(int[] arr,int i,int len){
+        //println("i="+i);
+        //有效数据下标从0开始
+        //左子节点
+        int left = 2*i+1;
+        //右子节点
+        int right = 2*i+2;
+        //初始化最大值节点为当前节点
+        int largest = i;
+        //左节点不超出数组范围且比较大节点值大，则更新较大值下标
+        if(left <len && arr[left] > arr[largest]){
+            //左节点比该节点大
+            largest = left;
+        }
+        //右节点不超出数组范围且比较大节点值大，则更新较大值下标
+        if(right <len && arr[right] > arr[largest]){
+            //左节点比该节点大
+            largest = right;
+        }
+        //如果子节点有一个比当前节点大，则进行数据呼唤，同时向下递归
+        if(largest != i){
+            //交换节点i与较大子节点数据
+            swap(arr,i,largest);
+            //经过上面的调整后节点i与其两个子节点满足大顶堆条件
+            //但是需要判断调整后的节点largest位置以及其子节点是否还满足大顶堆特性
+            maxHeepify(arr,largest,len);
+        }
+    }
+ 
+    private void swap(int[] arr,int i,int j){
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+}
+```
+
+#### 502、IPO
+
+假设 力扣（LeetCode）即将开始 IPO 。为了以更高的价格将股票卖给风险投资公司，力扣 希望在 IPO 之前开展一些项目以增加其资本。 由于资源有限，它只能在 IPO 之前完成最多 k 个不同的项目。帮助 力扣 设计完成最多 k 个不同项目后得到最大总资本的方式。
+
+给你 n 个项目。对于每个项目 i ，它都有一个纯利润 profits[i] ，和启动该项目需要的最小资本 capital[i] 。
+
+最初，你的资本为 w 。当你完成一个项目时，你将获得纯利润，且利润将被添加到你的总资本中。
+
+总而言之，从给定项目中选择 最多 k 个不同项目的列表，以 最大化最终资本 ，并输出最终可获得的最多资本。
+
+答案保证在 32 位有符号整数范围内。
+
+示例 1：
+
+```
+输入：k = 2, w = 0, profits = [1,2,3], capital = [0,1,1]
+输出：4
+解释：
+由于你的初始资本为 0，你仅可以从 0 号项目开始。
+在完成后，你将获得 1 的利润，你的总资本将变为 1。
+此时你可以选择开始 1 号或 2 号项目。
+由于你最多可以选择两个项目，所以你需要完成 2 号项目以获得最大的资本。
+因此，输出最后最大化的资本，为 0 + 1 + 3 = 4。
+```
+
+**解题思路**：
+
+贪心 + 堆
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210908091953870.png" alt="image-20210908091953870" style="zoom:80%;" />
+
+**题解代码**：
+
+```java
+class Solution {
+    public int findMaximizedCapital(int k, int w, int[] profits, int[] capital) {
+        int n = profits.length;
+        int curr = 0;
+        int[][] arr = new int[n][2];
+
+        for (int i = 0; i < n; ++i) {
+            arr[i][0] = capital[i];
+            arr[i][1] = profits[i];
+        }
+        Arrays.sort(arr, (a, b) -> a[0] - b[0]);
+
+        PriorityQueue<Integer> pq = new PriorityQueue<>((x, y) -> y - x);
+        for (int i = 0; i < k; ++i) {
+            while (curr < n && arr[curr][0] <= w) {
+                pq.add(arr[curr][1]);
+                curr++;
+            }
+            if (!pq.isEmpty()) {
+                w += pq.poll();
+            } else {
+                break;
+            }
+        }
+
+        return w;
+    }
+}
+```
+
 ### 二叉树
 
 参考链接：[二叉树所有遍历模板及知识点总结](https://leetcode-cn.com/problems/binary-tree-inorder-traversal/solution/python3-er-cha-shu-suo-you-bian-li-mo-ban-ji-zhi-s/)
