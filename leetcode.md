@@ -5003,6 +5003,93 @@ class Solution {
 }
 ```
 
+#### 剑指offer 59、滑动窗口的最大值
+
+给定一个数组 nums 和滑动窗口的大小 k，请找出所有滑动窗口里的最大值。
+
+示例:
+
+```
+输入: nums = [1,3,-1,-3,5,3,6,7], 和 k = 3
+输出: [3,3,5,5,6,7] 
+解释: 
+
+  滑动窗口的位置                最大值
+
+---------------               -----
+
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+```
+
+**解题思路**：
+
+- 优先队列
+- 单调队列
+
+**题解代码**：
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int n = nums.length;
+        if(n == 0 || k == 0) return new int[0];
+        //优先队列的定义，默认小顶堆，现在变成大顶堆
+        PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int []>(){
+            public int compare(int[] a , int[] b){
+                //先比较元素大小，大的在前面，相同就比较位置，后面的在前面
+                return a[0] != b[0] ? b[0] - a[0] : b[1] - a[1];
+            }
+        });
+        //初始化，将前k个元素放入队列中
+        for(int i = 0 ; i < k ; i++)
+            pq.offer(new int[]{nums[i] , i});
+        //结果数组，大小为n - k + 1
+        int[] ans = new int [n - k + 1] ;
+        //此时顶就是前k个元素的最大值
+        ans[0] = pq.peek()[0];
+        for(int i = k ; i < n;i++){
+            pq.offer(new int[]{nums[i] , i});
+            //顶点小于左边界，就弹出来
+            while(pq.peek()[1] <= i - k)
+                pq.poll();
+            ans[i - k + 1] = pq.peek()[0];         
+        }
+        return ans;
+    }
+
+    
+}
+```
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if(nums.length == 0 || k == 0) return new int[0];
+        Deque<Integer> deque = new LinkedList<>();
+        int n = nums.length;
+        int[] res = new int[n-k+1];
+        for(int j = 0, i = 1 - k; j < n; ++j, ++i){
+            if(i > 0 && deque.peekFirst() == nums[i-1]){
+                deque.removeFirst();
+            }
+            while(!deque.isEmpty() && deque.peekLast() < nums[j]){
+                deque.removeLast();
+            }
+            deque.addLast(nums[j]);
+            if(i >= 0){
+                res[i] = deque.peekFirst();
+            }
+        }
+        return res;
+    }
+}
+```
+
 ### 异或操作
 
 #### 260、只出现一次的数字III
