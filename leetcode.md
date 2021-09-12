@@ -636,6 +636,107 @@ class Solution {
 
 **ps：中缀式转后缀式也采用栈，对于操作符赋予不同的优先级**
 
+#### 678、有效的括号字符串
+
+给定一个只包含三种字符的字符串：（ ，） 和 *，写一个函数来检验这个字符串是否为有效字符串。有效字符串具有如下规则：
+
+任何左括号 ( 必须有相应的右括号 )。
+任何右括号 ) 必须有相应的左括号 ( 。
+左括号 ( 必须在对应的右括号之前 )。
+* 可以被视为单个右括号 ) ，或单个左括号 ( ，或一个空字符串。
+  一个空字符串也被视为有效字符串。
+
+示例 1:
+
+```
+输入: "()"
+输出: True
+```
+
+示例 2:
+
+```
+输入: "(*)"
+输出: True
+```
+
+**解题思路**：
+
+- 双栈
+
+  - 如果遇到左括号，则将当前下标存入左括号栈。
+
+  - 如果遇到星号，则将当前下标存入星号栈。
+
+  - 如果遇到右括号，则需要有一个左括号或星号和右括号匹配，由于星号也可以看成右括号或者空字符串，因此当前的右括号应优先和左括号匹配，没有左括号时和星号匹配：
+
+    - 如果左括号栈不为空，则从左括号栈弹出栈顶元素；
+
+    - 如果左括号栈为空且星号栈不为空，则从星号栈弹出栈顶元素；
+
+    - 如果左括号栈和星号栈都为空，则没有字符可以和当前的右括号匹配，返回 \text{false}false。
+
+- 正反遍历
+
+  遍历两次，第一次顺序，第二次逆序。
+
+  - 第一次遇到左括号加一，右括号减一，星号加一，最后保证cnt >= 0,也就是可以保证产生的左括号足够
+  - 第二次遇到右括号加一，左括号减一，星号加一，最后保证cnt >= 0,也就是可以保证产生的右括号足够
+
+  当两次遍历都是True，那么说明有效
+
+**题解代码**：
+
+```java
+class Solution {
+    public boolean checkValidString(String s) {
+        Deque<Integer> leftStack = new LinkedList<>();
+        Deque<Integer> starStack = new LinkedList<>();
+        int n = s.length();
+        for(int i = 0; i < n; ++i){
+            char c = s.charAt(i);
+            if(c == '('){
+                leftStack.push(i);
+            }else if(c == '*'){
+                starStack.push(i);
+            }else{
+                if(!leftStack.isEmpty()){
+                    leftStack.pop();
+                }else if(!starStack.isEmpty()){
+                    starStack.pop();
+                }else{
+                    return false;
+                }
+            }
+        }
+        while(!leftStack.isEmpty() && !starStack.isEmpty()){
+            int leftIndex = leftStack.pop();
+            int starIndex = starStack.pop();
+            if(leftIndex > starIndex){
+                return false;
+            }
+        }
+        return leftStack.isEmpty();  
+    }
+}
+```
+
+```python
+class Solution:
+    def checkValidString(self, s: str) -> bool:
+        
+        def help(a1,a2):
+            cnt = 0
+            for c in s if a1 == 1 else reversed(s):
+                if c == '(': cnt += a1 
+                if c == ')': cnt += a2
+                if c == '*': cnt += 1
+                if cnt < 0:
+                    return False
+            return True
+        return help(1,-1) and help(-1,1)
+```
+
 ### 堆
 
 #### 堆排序
