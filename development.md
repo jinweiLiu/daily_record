@@ -41,6 +41,13 @@
   cp filename 指定路径
   ```
 
+- 历史命令
+
+  ```
+  history 查看历史命令
+  history -c 清除历史命令
+  ```
+
 #### docker相关
 
 - docker使用

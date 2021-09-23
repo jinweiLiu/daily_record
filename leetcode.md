@@ -1981,6 +1981,68 @@ public class MergeSort {
 }
 ```
 
+堆排序
+
+```java
+public class HeapSort {
+    public static void main(String[] args) {
+        int[] array= {2,8,14,4,16,7,1};
+        heapSort(array);
+        //输出堆排序结果
+        for(int i:array){
+            System.out.println(i);
+        }
+    }
+
+    public static void heapSort(int[] arr) {
+        buildMaxHeap(arr);
+        int heapSize = arr.length;
+        for(int i = 0; i < arr.length - 1; ++i){
+            swap(arr, 0, heapSize-1);
+            heapSize--;
+            maxHeapify(arr, 0, heapSize);
+        }
+    }
+
+    public static void buildMaxHeap(int[] arr) {
+        int len = arr.length;
+        for(int i = (len - 2) / 2; i >= 0; --i){
+            maxHeapify(arr, i, len);
+        }
+    }
+
+    public static void maxHeapify(int[] arr, int i, int len) {
+        int left = 2 * i + 1;
+        int right = 2* i + 2;
+        int largest = i;
+
+        if(left < len && arr[left] > arr[largest]){
+            largest = left;
+        }
+        if(right < len && arr[right] > arr[largest]){
+            largest = right;
+        }
+
+        //如果子节点有一个比当前节点大，则进行数据呼唤，同时向下递归
+        if(largest != i){
+            //交换节点i与较大子节点数据
+            swap(arr, i, largest);
+            //经过上面的调整后节点i与其两个子节点满足大顶堆条件
+            //但是需要判断调整后的节点largest位置以及其子节点是否还满足大顶堆特性
+            maxHeapify(arr, largest, len);
+        }
+    }
+
+    public static void swap(int[] arr, int i, int j) {
+        int tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+    }
+}
+```
+
+
+
 #### 75、颜色分类
 
 给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
