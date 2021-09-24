@@ -13,6 +13,12 @@
   http://127.0.0.1:16006
   ```
 
+- jupyter notebook启动
+
+  ```bash
+nohup jupyter-notebook >jupyter.log 2>&1 &
+  ```
+
 - tensorboardX使用
 
   [详解PyTorch项目使用TensorboardX进行训练可视化](https://blog.csdn.net/bigbennyguo/article/details/87956434)
@@ -147,6 +153,26 @@ https://blog.csdn.net/xiewenbo/article/details/73832027
   # tensor([-0.2368])
   # -0.23680149018764496
   ```
+
+#### Tensor使用OpenCV显示
+
+OpenCV支持的图像数据是numpy格式，数据类型为uint8，而且像素值分布在[0,255]之间。所以tensor数据需要做一下变换，扩张到[0,255]，同时OpenCV的输入格式为(H,W,C)。
+
+```python
+array1=tensor2.numpy() #将tensor数据转为numpy数据
+maxValue=array1.max()
+array1=array1*255/maxValue #normalize，将图像数据扩展到[0,255]
+mat=np.uint8(array1) #float32-->uint8
+print('mat_shape:',mat.shape) #mat_shape: (3, 982, 814)
+mat=mat.transpose(1,2,0) #mat_shape: (982, 814，3)
+cv2.imshow("img",mat)
+cv2.waitKey()
+
+#由于opencv中的颜色通道顺序是BGR而PIL、torch里面的图像颜色通道是RGB，利用cvtColor对颜色通道进行转换
+mat=cv2.cvtColor(mat,cv2.COLOR_RGB2BGR)
+cv2.imshow("img",mat)
+cv2.waitKey()
+```
 
 #### 数据类型转换
 
