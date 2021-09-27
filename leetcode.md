@@ -317,6 +317,58 @@ class Solution {
 }
 ```
 
+#### 剑指offer 67、把字符串转换成整数
+
+写一个函数 StrToInt，实现把字符串转换成整数这个功能。
+
+说明：
+
+假设我们的环境只能存储 32 位大小的有符号整数，那么其数值范围为 [−2^31,  2^31 − 1]。如果数值超过这个范围，请返回  INT_MAX (2^31 − 1) 或 INT_MIN (−23^1) 。
+
+示例 1:
+
+```
+输入: "42"
+输出: 42
+```
+
+示例 2:
+
+```
+输入: "   -42"
+输出: -42
+解释: 第一个非空白字符为 '-', 它是一个负号。
+     我们尽可能将负号与后面所有连续出现的数字组合起来，最后得到 -42 。
+```
+
+**题解代码**：
+
+```java
+/*
+对于边界情况
+res > bndry 执行拼接10*res >= 2147483650越界
+res = bndry and x > 7 拼接后是2147483648或2147483649越界
+*/
+class Solution {
+    public int strToInt(String str) {
+        int res = 0, bndry = Integer.MAX_VALUE / 10;
+        int i = 0, sign = 1, length = str.length();
+        if(length == 0) return 0;
+        while(str.charAt(i) == ' ')
+            if(++i == length) return 0;
+        if(str.charAt(i) == '-') sign = -1;
+        if(str.charAt(i) == '-' || str.charAt(i) == '+') i++;
+        for(int j = i; j < length; j++) {
+            if(str.charAt(j) < '0' || str.charAt(j) > '9') break;
+            if(res > bndry || res == bndry && str.charAt(j) > '7')
+                return sign == 1 ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+            res = res * 10 + (str.charAt(j) - '0');
+        }
+        return sign * res;
+    }
+}
+```
+
 ### 链表
 
 #### 206、反转链表
