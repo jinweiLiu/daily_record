@@ -303,6 +303,44 @@
   >
   > print(sys.path)  #查看包含导入模块的路径
 
+- python堆
+
+  heapq默认为小根堆
+
+  - heapq.heappush(heap,item) 添加元素
+
+    > import heapq
+    >
+    > h = []
+    >
+    > heapq.heappush(h,2)
+
+  - heapq.heapify(list) 将列表转换为堆
+
+    > list = [1,2,7,10,4]
+    >
+    > heapq.heapify(list)
+
+  - heapq.heappop(heap) 删除最小值
+
+    > heapq.heappop(list)
+
+  - heapq.nlargest(n,heap) 查询堆中的最大元素，n表示查询元素个数
+
+    > list = [3, 5, 5, 9, 6, 6, 8, 99]
+    >
+    > heapq.nlargest(3,list)
+    >
+    > out: [99,9,8]
+
+  - heapq.nsmallest(n,heap)
+
+    > list = [3, 5, 5, 9, 6, 6, 8, 99]
+    >
+    > heapq.nsmallest(3,list)
+    >
+    > out: [3,5,5]
+
 #### Spring boot相关
 
 - 整合shiro 安全框架
