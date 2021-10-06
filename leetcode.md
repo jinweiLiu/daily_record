@@ -5646,3 +5646,49 @@ class LRUCache {
 }
 ```
 
+### TreeSet
+
+是一个有序的结合，它的作用是提供有序的set集合
+
+#### 414、第三大的数
+
+给你一个非空数组，返回此数组中 第三大的数 。如果不存在，则返回数组中最大的数。
+
+示例 1：
+
+```
+输入：[3, 2, 1]
+输出：1
+解释：第三大的数是 1 。
+```
+
+示例 2：
+
+```
+输入：[1, 2]
+输出：2
+解释：第三大的数不存在, 所以返回最大的数 2 。
+```
+
+**解题思路**：
+
+- 排序
+- 有序集合
+
+**题解代码**：
+
+```java
+class Solution {
+    public int thirdMax(int[] nums) {
+        TreeSet<Integer> s = new TreeSet<Integer>();
+        for (int num : nums) {
+            s.add(num);
+            if (s.size() > 3) {
+                s.remove(s.first());
+            }
+        }
+        return s.size() == 3 ? s.first() : s.last();
+    }
+}
+```
+
