@@ -48,6 +48,44 @@
   history -c 清除历史命令
   ```
 
+- 定时任务
+
+  - 只执行一次 at
+
+    at命令格式
+
+    > at (选项)（参数）
+    >
+    > ctrl + D结束命令输入
+
+    示例：
+
+    ![image-20211016150618507](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20211016150618507.png)
+
+    1）使用相对时间执行命令
+
+    时间单位可以是minutes（分钟）、hours（小时）、days（天）或weeks（星期）
+
+    > at now +3 minutes
+
+    2）使用绝对时间执行命令
+
+    它接受HH:MM形式的时间在一天的特定时间允许一项工作
+
+    > at 20:00 2008-10-1　　在具体时间执行
+
+    > at允许复杂的时间规范，扩展POSIX.2标准。它接受HH:MM形式的时间在一天的特定时间允许一项工作。如果时间已经过去，则假定是第二天。你也可以指定midnight午夜、noon中午或teatime下午茶时间（4PM），并且你可以使用AM、PM来表达允许时间的上午和下午。你还可以表明作业在哪一天运行，通过给出一个形式上有月份名称和任意的年份的日期，或给出形式为MMDDYY、MM/DD/YY、DD.MM.YY、YYYY-MM-DD的日期。日期规格必须遵循一天的时间规格。你也可以给出now + count time-units（时间单位）的时间，时间单位可以是minutes（分钟）、hours（小时）、days（天）或weeks（星期），并且你能通过添加today或tomorrow后缀来告诉at命令今天或明天运行作业。
+
+    3）其他命令
+
+    > atq 查看待处理的作业
+    >
+    > atrm [jobid] 删除无用的作业
+
+    参考链接：[https://www.cnblogs.com/diantong/p/9366449.html](https://www.cnblogs.com/diantong/p/9366449.html)
+
+  - 周期执行 crontab
+
 #### docker相关
 
 - docker使用
