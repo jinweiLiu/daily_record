@@ -82,9 +82,83 @@
     >
     > atrm [jobid] 删除无用的作业
 
+    查看at执行的具体内容：一般位于/var/spool/at目录下面
+
     参考链接：[https://www.cnblogs.com/diantong/p/9366449.html](https://www.cnblogs.com/diantong/p/9366449.html)
 
   - 周期执行 crontab
+
+    crontab是linux下的定时执行工具，由于crontab是linux的内置服务，但它不自动起来，可以用以下的方法启动、关闭服务
+
+    ```bash
+    #安装crontab
+    yum install crontabs
+    
+    /sbin/service crond start #启动服务
+    /sbin/service crond stop //关闭服务
+    /sbin/service crond restart //重启服务
+    /sbin/service crond reload //重新载入配置
+    /sbin/service crond status //查看服务状态
+    ```
+
+    使用：
+
+    直接用crontab命令编辑
+
+    cron服务提供 crontab命令来设定cron服务的，以下是这个命令的一些参数与说明：
+
+    ```bash
+    crontab -u #设定某个用户的cron服务，一般root用户在执行这个命令的时候需要此参数
+    crontab -l #列出某个用户cron服务的详细内容
+    crontab -r #删除某个用户的cron服务
+    crontab -e #编辑某个用户的cron服务比如说root查看自己的cron设置：crontab -u root -l
+    ```
+
+    再例如，root想删除fred的cron设置：crontab -u fred -r
+
+    基本格式 :
+
+    \* * * * * command
+
+    分　 时　 日　 月　 周　 命令
+
+    第1列表示分钟1～59 每分钟用*或者 */1表示
+
+    第2列表示小时1～23(0表示0点)
+
+    第3列表示日期1～31
+
+    第4列表示月份1～12
+
+    第5列标识号星期0～6(0表示星期天)
+
+    第6列要运行的命令crontab文件
+
+    > 示例：
+    >
+    > \#每晚的21:30重启apache。
+    >
+    > 30 21 * * * /usr/local/etc/rc.d/lighttpd restart
+    >
+    > \#每月1、10、22日
+    >
+    > 45 4 1,10,22 * * /usr/local/etc/rc.d/lighttpd restart
+    >
+    > \#每天早上6点10分
+    >
+    > 10 6 * * * date
+    >
+    > \#每两个小时
+    >
+    > 0 */2 * * * date
+    >
+    > \#晚上11点到早上8点之间每两个小时，早上8点
+    >
+    > 0 23-7/2，8 * * * date
+
+    参考：[https://blog.csdn.net/weixin_34593388/article/details/116921337](https://blog.csdn.net/weixin_34593388/article/details/116921337)
+
+    [https://www.cnblogs.com/ftl1012/p/crontab.html](https://www.cnblogs.com/ftl1012/p/crontab.html)
 
 #### docker相关
 
