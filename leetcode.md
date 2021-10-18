@@ -2260,7 +2260,7 @@ class Solution {
         int left = 0, right = n-1;
         
         while(left <= right){
-            int mid = (left + right) / 2;
+            int mid = (left + right) / 2; //考虑溢出问题，一般为 left + (right - left) / 2
             if(a[mid] == target){
                 return mid;
             }
@@ -2279,7 +2279,7 @@ class Solution {
         int left = 0, right = n-1;
         
         while(left < right){
-            int mid = (left + right) / 2;
+            int mid = (left + right) / 2; //考虑溢出问题，一般为 left + (right - left) / 2
             if(a[mid] == target){
                 return mid;
             }
