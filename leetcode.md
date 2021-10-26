@@ -467,6 +467,79 @@ class Solution {
 }
 ```
 
+#### 141、环形链表
+
+给定一个链表，判断链表中是否有环。
+
+**解题思路**：
+
+快慢指针
+
+**题解代码**：
+
+```java
+public class Solution {
+    public boolean hasCycle(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while(fast != null && fast.next != null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow == fast){
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+#### 287、寻找重复数
+
+给定一个包含 n + 1 个整数的数组 nums ，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。
+
+假设 nums 只有 一个重复的整数 ，找出 这个重复的数 。
+
+你设计的解决方案必须不修改数组 nums 且只用常量级 O(1) 的额外空间。
+
+**示例 1：**
+
+```
+输入：nums = [1,3,4,2,2]
+输出：2
+```
+
+**示例 2：**
+
+```
+输入：nums = [3,1,3,4,2]
+输出：3
+```
+
+**解题思路：**
+
+快慢指针，找环入口
+
+**题解代码：**
+
+```java
+class Solution {
+    public int findDuplicate(int[] nums) {
+        int slow = 0, fast = 0;
+        do{
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        }while(slow != fast);
+        slow = 0;
+        while(slow != fast){
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return slow;
+    }
+}
+```
+
 #### 148、排序链表
 
 给你链表的头结点head，请将其按升序排列并返回排序后的链表。
