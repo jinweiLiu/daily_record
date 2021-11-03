@@ -253,7 +253,7 @@ JDK 1.8 的时候，方法区（HotSpot的永久代）被彻底移除了（JDK1.
 
 #### 加载过程
 
-<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210907210108285.png" alt="image-20210907210108285" style="zoom: 80%;" />
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20211103105739921.png" alt="image-20211103105739921" style="zoom:80%;" />
 
 - 加载
 
@@ -303,7 +303,7 @@ JDK 1.8 的时候，方法区（HotSpot的永久代）被彻底移除了（JDK1.
 
 类加载器双亲委派模型
 
-<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20210907212313059.png" alt="image-20210907212313059" style="zoom:80%;" />
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20211103105725385.png" alt="image-20211103105725385" style="zoom:80%;" />
 
 双亲委派模型的工作过程是：如果一个类加载器收到了类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到顶层的启动类加载器中，只有当父加载器反馈自己无法完成这个加载请求（它的搜索范围中没有找到所需的类）时，子加载器才会尝试自己去加载。
 

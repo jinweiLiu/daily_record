@@ -2166,7 +2166,75 @@ public class HeapSort {
 }
 ```
 
+#### 剑指offer、数组中的逆序对
 
+在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。
+
+示例 1:
+
+```
+输入: [7,5,6,4]
+输出: 5
+```
+
+**解题思路：**
+
+归并排序
+
+逆序对增加过程
+
+![image-20211103212739245](C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20211103212739245.png)
+
+总体过程
+
+<img src="C:\Users\jwliu\AppData\Roaming\Typora\typora-user-images\image-20211103212706819.png" alt="image-20211103212706819" style="zoom:67%;" />
+
+**题解代码：**
+
+```java
+class Solution {
+    int res = 0;
+    public int reversePairs(int[] nums) {
+        merg(nums, 0, nums.length - 1);
+        return res;
+    }
+
+    public void merg(int[] nums, int left, int right){
+        int mid = left + ((right - left) >> 1);
+        if(left < right){
+            merg(nums,left,mid);
+            merg(nums,mid + 1, right);
+            count(nums,left,mid,right);
+        }
+    }
+
+    public void count(int[] nums, int left, int mid, int right){
+        int[] tmp = new int[right - left + 1];
+        int index = 0;
+        int l = left, m = mid + 1;
+
+        while(l <= mid && m <= right){
+            if(nums[l] <= nums[m]){
+                tmp[index++] = nums[l++];
+            }else{
+                res += (mid - l + 1);
+                tmp[index++] = nums[m++];
+            }
+        }
+
+        while(l <= mid){
+            tmp[index++] = nums[l++];
+        }
+
+        while(m <= right){
+            tmp[index++] = nums[m++];
+        }
+        for(int k = 0; k < tmp.length; ++k){
+            nums[k + left] = tmp[k];
+        }
+    }
+}
+```
 
 #### 75、颜色分类
 
