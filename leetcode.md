@@ -5841,3 +5841,58 @@ class Solution {
 }
 ```
 
+### 位运算
+
+#### 318、最大单词长度乘积
+
+给定一个字符串数组 words，找到 length(word[i]) * length(word[j]) 的最大值，并且这两个单词不含有公共字母。你可以认为每个单词只包含小写字母。如果不存在这样的两个单词，返回 0。
+
+示例 1:
+
+```
+输入: ["abcw","baz","foo","bar","xtfn","abcdef"]
+输出: 16 
+解释: 这两个单词为 "abcw", "xtfn"。
+```
+
+示例 2:
+
+```
+输入: ["a","ab","abc","d","cd","bcd","abcd"]
+输出: 4 
+解释: 这两个单词为 "ab", "cd"。
+```
+
+**解题思路：**
+
+为了得到最大单词长度乘积，朴素的做法是，遍历字符串数组 words 中的每一对单词，判断这一对单词是否有公共字母，如果没有公共字母，则用这一对单词的长度乘积更新最大单词长度乘积。
+
+优化解法：使用位运算预处理每个单词，通过位运算操作判断两个单词是否有公共字母。用数组 masks 记录每个单词的位掩码表示。计算数组 masks 之后，判断第 i 个单词和第 j 个单词是否有公共字母可以通过判断 masks[i] & masks[j] 是否等于 0 实现，当且仅当 masks[i] & masks[j]=0 时第 i 个单词和第 j 个单词没有公共字母，此时使用这两个单词的长度乘积更新最大单词长度乘积。
+
+**题解代码：**
+
+```java
+class Solution {
+    public int maxProduct(String[] words) {
+        int length = words.length;
+        int[] masks = new int[length];
+        for (int i = 0; i < length; i++) {
+            String word = words[i];
+            int wordLength = word.length();
+            for (int j = 0; j < wordLength; j++) {
+                masks[i] |= 1 << (word.charAt(j) - 'a');
+            }
+        }
+        int maxProd = 0;
+        for (int i = 0; i < length; i++) {
+            for (int j = i + 1; j < length; j++) {
+                if ((masks[i] & masks[j]) == 0) {
+                    maxProd = Math.max(maxProd, words[i].length() * words[j].length());
+                }
+            }
+        }
+        return maxProd;
+    }
+}
+```
+
