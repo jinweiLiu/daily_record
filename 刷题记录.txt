@@ -1,0 +1,25 @@
+2021.12.21
+剑指offer45 排序
+剑指offer57 类似滑动窗口
+剑指offer46 动态规划 -> 滚动数组
+剑指offer52 同时遍历两个链表 a+b  b+a
+
+反转链表II  部分反转 -> 两次遍历 一次遍历+头插法
+
+2021.12.25
+面试题10.03 搜索旋转数组  是否包含重复元素 这是一个系列
+https://leetcode-cn.com/problems/search-rotate-array-lcci/solution/xuan-zhuan-shu-zu-cong-yi-dao-nan-ge-ge-dcv7a/
+剑指offer34 在排序数组中查找元素target的第一个和最后一个位置   大于target-1和大于target的位置
+
+2021.12.27
+剑指offer II 095 最长公共子序列
+动态规划
+面试题16.16 部分排序
+双指针 两遍扫描
+面试题16.10 生存人数
+差分数组
+
+2021.12.28
+215、数组中的第k个最大元素
+优先队列 or 快速排序
+
